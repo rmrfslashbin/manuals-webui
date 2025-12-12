@@ -9,7 +9,7 @@
 
     <!-- Search Form -->
     <div class="bg-white shadow sm:rounded-lg p-6">
-        <form action="/search" method="get">
+        <form action="/search" method="get" id="search-form">
             <div class="flex gap-4">
                 <div class="flex-1">
                     <label for="q" class="sr-only">Search query</label>
@@ -28,6 +28,15 @@
             </div>
         </form>
     </div>
+
+    <!-- Search History -->
+    {{if not .Content.Query}}
+    <div class="bg-white shadow sm:rounded-lg p-6">
+        <div id="search-history">
+            <!-- Search history will be populated by JavaScript -->
+        </div>
+    </div>
+    {{end}}
 
     <!-- Search Results -->
     <div id="search-results">

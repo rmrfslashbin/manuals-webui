@@ -5,9 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}} - Manuals</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="stylesheet" href="/static/output.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="/static/notifications.js" defer></script>
+    <script src="/static/retry.js" defer></script>
+    <script src="/static/cache.js" defer></script>
+    <script src="/static/shortcuts.js" defer></script>
+    <script src="/static/shortcuts-config.js" defer></script>
+    <script src="/static/search-history.js" defer></script>
+    <script src="/static/dark-mode.js" defer></script>
+    <script src="/static/remember-me.js" defer></script>
     <style>
+        /* HTMX Loading Indicators */
         .htmx-indicator {
             display: none;
         }
@@ -17,17 +27,271 @@
         .htmx-request.htmx-indicator {
             display: inline;
         }
+
+        /* Loading state for buttons */
+        .htmx-request.htmx-indicator,
+        .htmx-request {
+            opacity: 0.6;
+            cursor: wait;
+            pointer-events: none;
+        }
+
+        /* Spinner animation */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Notification progress bar */
+        @keyframes shrink {
+            from {
+                width: 100%;
+            }
+            to {
+                width: 0%;
+            }
+        }
+        .animate-shrink {
+            animation: shrink 5s linear forwards;
+        }
+
+        /* Global loading bar */
+        #loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, #4f46e5, #818cf8);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+            z-index: 9999;
+        }
+        #loading-bar.active {
+            transform: scaleX(1);
+        }
+
+        /* Print Styles */
+        @media print {
+            /* Hide non-content elements */
+            nav,
+            #loading-bar,
+            #theme-toggle-container,
+            #mobile-menu,
+            #mobile-menu-button,
+            .no-print,
+            button:not(.print-keep) {
+                display: none !important;
+            }
+
+            /* Reset page layout */
+            body {
+                background: white !important;
+                color: black !important;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Remove transitions/animations for print */
+            * {
+                transition: none !important;
+                animation: none !important;
+            }
+
+            /* Optimize main content */
+            main {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* Ensure content fits page */
+            .mx-auto.max-w-7xl {
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+
+            /* Card styles for print */
+            .bg-white,
+            .shadow,
+            .sm\\:rounded-lg,
+            .rounded-lg {
+                background: white !important;
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+                page-break-inside: avoid;
+            }
+
+            /* Table styles */
+            table {
+                page-break-inside: auto;
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            /* Links */
+            a {
+                color: black !important;
+                text-decoration: underline;
+            }
+
+            a[href]:after {
+                content: " (" attr(href) ")";
+                font-size: 0.8em;
+                color: #666;
+            }
+
+            /* Don't show URLs for internal links */
+            a[href^="/"]:after,
+            a[href^="#"]:after {
+                content: "";
+            }
+
+            /* Headings */
+            h1, h2, h3, h4, h5, h6 {
+                page-break-after: avoid;
+                page-break-inside: avoid;
+                color: black !important;
+            }
+
+            /* Lists */
+            ul, ol {
+                page-break-inside: avoid;
+            }
+
+            /* Images */
+            img {
+                max-width: 100% !important;
+                page-break-inside: avoid;
+            }
+
+            /* Code blocks */
+            pre, code {
+                background: #f9fafb !important;
+                border: 1px solid #e5e7eb !important;
+                page-break-inside: avoid;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+
+            /* Badges and tags */
+            .bg-green-50,
+            .bg-blue-50,
+            .bg-indigo-50,
+            .bg-yellow-50,
+            .bg-red-50 {
+                background: white !important;
+                border: 1px solid #d1d5db !important;
+                color: black !important;
+            }
+
+            /* Page breaks */
+            .page-break-before {
+                page-break-before: always;
+            }
+
+            .page-break-after {
+                page-break-after: always;
+            }
+
+            .page-break-avoid {
+                page-break-inside: avoid;
+            }
+
+            /* Print header/footer */
+            @page {
+                margin: 1cm;
+                size: A4;
+            }
+
+            /* Add print timestamp */
+            .print-timestamp::after {
+                content: "Printed: " attr(data-timestamp);
+                display: block;
+                margin-top: 1em;
+                font-size: 0.8em;
+                color: #666;
+            }
+        }
     </style>
 </head>
-<body class="h-full bg-gray-50">
+<body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+    <!-- Global loading bar -->
+    <div id="loading-bar"></div>
+
     <div class="min-h-full">
         {{template "nav" .}}
         <main class="py-6">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 dark:text-gray-100">
                 {{template "content" .}}
             </div>
         </main>
     </div>
+
+    <!-- Configuration Check & Offline Detection -->
+    <script>
+        // Check if we're already on setup or settings page
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/setup' && currentPath !== '/settings') {
+            // Check if configuration exists
+            const configured = sessionStorage.getItem('manuals_configured');
+            if (!configured) {
+                // Redirect to setup (after brief delay for notification)
+                setTimeout(() => {
+                    window.location.href = '/setup';
+                }, 2000);
+            }
+        }
+
+        // Offline/Online detection
+        function updateOnlineStatus() {
+            if (!navigator.onLine) {
+                notifications.warning('You are currently offline. Some features may not work.', 0);
+            }
+        }
+
+        window.addEventListener('online', () => {
+            notifications.success('Connection restored');
+        });
+
+        window.addEventListener('offline', () => {
+            notifications.error('Connection lost. Please check your network.', 0);
+        });
+
+        // Check on page load
+        window.addEventListener('DOMContentLoaded', updateOnlineStatus);
+
+        // Global loading bar for HTMX requests
+        const loadingBar = document.getElementById('loading-bar');
+        let activeRequests = 0;
+
+        document.addEventListener('htmx:beforeRequest', () => {
+            activeRequests++;
+            if (activeRequests > 0) {
+                loadingBar.classList.add('active');
+            }
+        });
+
+        document.addEventListener('htmx:afterRequest', () => {
+            activeRequests = Math.max(0, activeRequests - 1);
+            if (activeRequests === 0) {
+                loadingBar.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>
 {{end}}
@@ -40,15 +304,63 @@
                 <div class="flex-shrink-0">
                     <span class="text-white font-bold text-xl">Manuals</span>
                 </div>
-                <div class="ml-10 flex items-baseline space-x-4">
+                <!-- Desktop navigation -->
+                <div class="hidden md:ml-10 md:flex md:items-baseline md:space-x-4">
                     <a href="/" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Home</a>
                     <a href="/devices" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Devices</a>
                     <a href="/documents" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Documents</a>
                     <a href="/search" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Search</a>
                     <a href="/admin" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Admin</a>
+                    <a href="/settings" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Settings</a>
                 </div>
+            </div>
+            <!-- Mobile menu button -->
+            <div class="flex md:hidden">
+                <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center rounded-md p-2 text-indigo-200 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="sr-only">Open main menu</span>
+                    <!-- Hamburger icon -->
+                    <svg class="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
+
+    <!-- Mobile menu -->
+    <div class="hidden md:hidden" id="mobile-menu">
+        <div class="space-y-1 px-2 pb-3 pt-2">
+            <a href="/" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Home</a>
+            <a href="/devices" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Devices</a>
+            <a href="/documents" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Documents</a>
+            <a href="/search" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Search</a>
+            <a href="/admin" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Admin</a>
+            <a href="/settings" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Settings</a>
+        </div>
+    </div>
 </nav>
+
+<script>
+// Mobile menu toggle
+document.addEventListener('DOMContentLoaded', () => {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', () => {
+            const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+            mobileMenuButton.setAttribute('aria-expanded', !isExpanded);
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when clicking a link
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                mobileMenuButton.setAttribute('aria-expanded', 'false');
+            });
+        });
+    }
+});
+</script>
 {{end}}

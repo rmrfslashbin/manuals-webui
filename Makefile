@@ -12,22 +12,29 @@ all: check build
 
 ## Build targets
 
-build: ## Build the binary
-	go build $(LDFLAGS) -o $(BINARY_NAME) ./cmd/manuals-webui
+build: build-css ## Build the binary
+	@mkdir -p bin
+	go build $(LDFLAGS) -o bin/$(BINARY_NAME) ./cmd/manuals-webui
+
+build-css: ## Build Tailwind CSS
+	@./node_modules/.bin/tailwindcss -i ./input.css -o ./internal/server/static/output.css --minify
 
 build-linux: ## Build for Linux amd64
-	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o $(BINARY_NAME)-linux-amd64 ./cmd/manuals-webui
+	@mkdir -p bin
+	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o bin/$(BINARY_NAME)-linux-amd64 ./cmd/manuals-webui
 
 build-darwin: ## Build for macOS amd64
-	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o $(BINARY_NAME)-darwin-amd64 ./cmd/manuals-webui
+	@mkdir -p bin
+	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o bin/$(BINARY_NAME)-darwin-amd64 ./cmd/manuals-webui
 
 build-darwin-arm64: ## Build for macOS arm64
-	GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o $(BINARY_NAME)-darwin-arm64 ./cmd/manuals-webui
+	@mkdir -p bin
+	GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o bin/$(BINARY_NAME)-darwin-arm64 ./cmd/manuals-webui
 
 build-all: build-linux build-darwin build-darwin-arm64 ## Build for all platforms
 
 clean: ## Remove build artifacts
-	rm -f $(BINARY_NAME) $(BINARY_NAME)-* coverage.out coverage.html
+	rm -rf bin coverage.out coverage.html
 
 ## Test targets
 

@@ -1,0 +1,130 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="space-y-6">
+    <div class="md:flex md:items-center md:justify-between">
+        <div class="min-w-0 flex-1">
+            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                Settings
+            </h2>
+        </div>
+    </div>
+
+    <!-- API Configuration -->
+    <div class="bg-white shadow sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-base font-semibold leading-6 text-gray-900">API Configuration</h3>
+            <div class="mt-2 max-w-xl text-sm text-gray-500">
+                <p>Manage your API connection settings. These are stored in your browser's local storage.</p>
+            </div>
+
+            <div class="mt-5 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">API URL</label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <input
+                            type="text"
+                            id="current-api-url"
+                            readonly
+                            class="block w-full rounded-md border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 sm:text-sm"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">API Key</label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                        <input
+                            type="password"
+                            id="current-api-key"
+                            readonly
+                            class="block w-full rounded-md border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 sm:text-sm"
+                        />
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Masked for security</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <a
+                        href="/setup"
+                        class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                        Reconfigure
+                    </a>
+                    <button
+                        type="button"
+                        onclick="clearConfiguration()"
+                        class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                    >
+                        Clear Configuration
+                    </button>
+                    <button
+                        type="button"
+                        onclick="testCurrentConnection()"
+                        class="inline-flex items-center rounded-md bg-gray-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
+                    >
+                        Test Connection
+                    </button>
+                </div>
+
+                <div id="test-result" class="hidden mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Storage Information -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3 flex-1">
+                <h3 class="text-sm font-medium text-blue-800">About Browser Storage</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <p>
+                        Your API configuration is stored in your browser's sessionStorage. This means:
+                    </p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>Settings cleared when you close the tab/window</li>
+                        <li>More secure than localStorage (shorter exposure)</li>
+                        <li>You'll need to reconfigure each browser session</li>
+                        <li>Settings are device-specific (not synced)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Warning -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3 flex-1">
+                <h3 class="text-sm font-medium text-yellow-800">Security Considerations</h3>
+                <div class="mt-2 text-sm text-yellow-700">
+                    <p>
+                        Browser sessionStorage is not encrypted. Your API key is stored in plain text
+                        (but only for this tab session) and can be accessed by:
+                    </p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>Browser DevTools (inspect element)</li>
+                        <li>Browser extensions</li>
+                        <li>Malicious scripts (XSS attacks)</li>
+                    </ul>
+                    <p class="mt-2 font-medium">
+                        Only use this on trusted devices and networks.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/settings.js" defer></script>
+{{end}}

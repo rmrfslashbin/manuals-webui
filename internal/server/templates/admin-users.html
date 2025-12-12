@@ -9,8 +9,8 @@
     </div>
 
     <!-- Admin navigation tabs -->
-    <div class="border-b border-gray-200">
-        <nav class="-mb-px flex space-x-8">
+    <div class="border-b border-gray-200 overflow-x-auto">
+        <nav class="-mb-px flex space-x-4 sm:space-x-8 min-w-max sm:min-w-0">
             <a href="/admin" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Overview</a>
             <a href="/admin/users" class="border-indigo-500 text-indigo-600 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Users</a>
             <a href="/admin/settings" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">Settings</a>
@@ -64,7 +64,7 @@
         </div>
         <div id="user-list">
             {{with .Content}}
-            <div class="border-t border-gray-200">
+            <div class="border-t border-gray-200 overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-300">
                     <thead class="bg-gray-50">
                         <tr>

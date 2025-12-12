@@ -26,24 +26,29 @@ type Config struct {
 
 // Server is the web UI server.
 type Server struct {
-	client    *client.Client
-	logger    *slog.Logger
-	templates *template.Template
+	client       *client.Client
+	logger       *slog.Logger
+	baseTemplate *template.Template
+	funcMap      template.FuncMap
 }
 
 // New creates a new server instance.
 func New(cfg Config) *Server {
-	// Parse templates
-	tmpl := template.Must(template.New("").Funcs(template.FuncMap{
+	// Create function map for templates
+	funcMap := template.FuncMap{
 		"formatBytes": formatBytes,
 		"truncate":    truncate,
 		"add":         func(a, b int) int { return a + b },
-	}).ParseFS(templatesFS, "templates/*.html", "templates/**/*.html"))
+	}
+
+	// Parse base template only
+	baseTemplate := template.Must(template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/base.html"))
 
 	return &Server{
-		client:    cfg.Client,
-		logger:    cfg.Logger,
-		templates: tmpl,
+		client:       cfg.Client,
+		logger:       cfg.Logger,
+		baseTemplate: baseTemplate,
+		funcMap:      funcMap,
 	}
 }
 
@@ -54,6 +59,10 @@ func (s *Server) Handler() http.Handler {
 	// Static files
 	staticContent, _ := fs.Sub(staticFS, "static")
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticContent))))
+
+	// Configuration pages
+	mux.HandleFunc("GET /setup", s.handleSetup)
+	mux.HandleFunc("GET /settings", s.handleSettings)
 
 	// Pages
 	mux.HandleFunc("GET /", s.handleHome)

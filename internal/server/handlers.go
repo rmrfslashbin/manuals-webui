@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"strconv"
@@ -57,6 +58,19 @@ type settingsData struct {
 }
 
 // Page handlers
+
+// Configuration pages
+func (s *Server) handleSetup(w http.ResponseWriter, r *http.Request) {
+	s.render(w, "setup.html", pageData{
+		Title: "Setup - Manuals",
+	})
+}
+
+func (s *Server) handleSettings(w http.ResponseWriter, r *http.Request) {
+	s.render(w, "settings.html", pageData{
+		Title: "Settings - Manuals",
+	})
+}
 
 func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -270,16 +284,47 @@ func (s *Server) handleDownload(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) render(w http.ResponseWriter, name string, data interface{}) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.templates.ExecuteTemplate(w, name, data); err != nil {
-		s.logger.Error("template error", "template", name, "error", err)
+
+	// Clone base template and parse the specific page template
+	tmpl, err := s.baseTemplate.Clone()
+	if err != nil {
+		s.logger.Error("template clone error", "template", name, "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Parse the specific template file
+	tmpl, err = tmpl.ParseFS(templatesFS, "templates/"+name)
+	if err != nil {
+		s.logger.Error("template parse error", "template", name, "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Execute the template
+	if err := tmpl.ExecuteTemplate(w, name, data); err != nil {
+		s.logger.Error("template execute error", "template", name, "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }
 
 func (s *Server) renderPartial(w http.ResponseWriter, name string, data interface{}) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.templates.ExecuteTemplate(w, name, data); err != nil {
-		s.logger.Error("template error", "template", name, "error", err)
+
+	// Create a new template with function map
+	tmpl := template.New("").Funcs(s.funcMap)
+
+	// Parse the partial template
+	tmpl, err := tmpl.ParseFS(templatesFS, "templates/"+name)
+	if err != nil {
+		s.logger.Error("partial template parse error", "template", name, "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Execute the partial template
+	if err := tmpl.ExecuteTemplate(w, name, data); err != nil {
+		s.logger.Error("partial template execute error", "template", name, "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }

@@ -1,0 +1,26 @@
+{
+  "name": "manuals-webui",
+  "version": "1.0.0",
+  "description": "Web UI for the Manuals documentation platform.",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./input.css -o ./internal/server/static/output.css --minify",
+    "watch:css": "tailwindcss -i ./input.css -o ./internal/server/static/output.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rmrfslashbin/manuals-webui.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rmrfslashbin/manuals-webui/issues"
+  },
+  "homepage": "https://github.com/rmrfslashbin/manuals-webui#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
+  }
+}
