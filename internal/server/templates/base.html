@@ -314,6 +314,28 @@
                     <a href="/settings" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Settings</a>
                 </div>
             </div>
+            <!-- Right side: theme toggle and logout -->
+            <div class="hidden md:flex md:items-center md:space-x-3">
+                <!-- Dark mode toggle -->
+                <button id="theme-toggle" type="button" class="rounded-md p-2 text-indigo-200 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" title="Toggle dark mode (Alt+T)">
+                    <span class="sr-only">Toggle dark mode</span>
+                    <!-- Sun icon (shown in dark mode) -->
+                    <svg id="theme-toggle-light-icon" class="hidden h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+                    </svg>
+                    <!-- Moon icon (shown in light mode) -->
+                    <svg id="theme-toggle-dark-icon" class="hidden h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                    </svg>
+                </button>
+                <!-- Logout button -->
+                <button id="logout-btn" type="button" class="rounded-md p-2 text-indigo-200 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" title="Logout">
+                    <span class="sr-only">Logout</span>
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
+                </button>
+            </div>
             <!-- Mobile menu button -->
             <div class="flex md:hidden">
                 <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center rounded-md p-2 text-indigo-200 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
@@ -336,6 +358,13 @@
             <a href="/search" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Search</a>
             <a href="/admin" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Admin</a>
             <a href="/settings" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium">Settings</a>
+            <div class="border-t border-indigo-500 my-2"></div>
+            <button id="mobile-theme-toggle" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium w-full text-left">
+                <span id="mobile-theme-text">Toggle Dark Mode</span>
+            </button>
+            <button id="mobile-logout-btn" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium w-full text-left">
+                Logout
+            </button>
         </div>
     </div>
 </nav>
@@ -360,6 +389,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 mobileMenuButton.setAttribute('aria-expanded', 'false');
             });
         });
+    }
+
+    // Logout functionality
+    function performLogout() {
+        if (!confirm('Are you sure you want to logout? This will clear all local data.')) {
+            return;
+        }
+
+        // Clear all localStorage items related to manuals
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('manuals_')) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        // Clear sessionStorage
+        sessionStorage.removeItem('manuals_configured');
+
+        // Clear any cached data
+        if (typeof cacheControl !== 'undefined' && cacheControl.clearAll) {
+            cacheControl.clearAll();
+        }
+
+        // Show notification if available
+        if (typeof notifications !== 'undefined') {
+            notifications.success('Logged out successfully. Redirecting...');
+        }
+
+        // Redirect to setup page
+        setTimeout(() => {
+            window.location.href = '/setup';
+        }, 500);
+    }
+
+    // Attach logout handlers
+    const logoutBtn = document.getElementById('logout-btn');
+    const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', performLogout);
+    }
+    if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener('click', performLogout);
     }
 });
 </script>
