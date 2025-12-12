@@ -2,6 +2,7 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -290,6 +291,222 @@ func (c *Client) get(path string, result interface{}) error {
 	}
 
 	return nil
+}
+
+// post performs a POST request with JSON body.
+func (c *Client) post(path string, body interface{}, result interface{}) error {
+	var reqBody io.Reader
+	if body != nil {
+		jsonBody, err := json.Marshal(body)
+		if err != nil {
+			return fmt.Errorf("failed to marshal request: %w", err)
+		}
+		reqBody = bytes.NewReader(jsonBody)
+	}
+
+	req, err := http.NewRequest("POST", c.baseURL+"/api/"+APIVersion+path, reqBody)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("X-API-Key", c.apiKey)
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		var errResp ErrorResponse
+		if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
+			respBody, _ := io.ReadAll(resp.Body)
+			return fmt.Errorf("API error (%d): %s", resp.StatusCode, string(respBody))
+		}
+		return fmt.Errorf("API error (%d): %s", resp.StatusCode, errResp.Error)
+	}
+
+	if result != nil {
+		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+			return fmt.Errorf("failed to decode response: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// put performs a PUT request with JSON body.
+func (c *Client) put(path string, body interface{}) error {
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	req, err := http.NewRequest("PUT", c.baseURL+"/api/"+APIVersion+path, bytes.NewReader(jsonBody))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("X-API-Key", c.apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		var errResp ErrorResponse
+		if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
+			respBody, _ := io.ReadAll(resp.Body)
+			return fmt.Errorf("API error (%d): %s", resp.StatusCode, string(respBody))
+		}
+		return fmt.Errorf("API error (%d): %s", resp.StatusCode, errResp.Error)
+	}
+
+	return nil
+}
+
+// delete performs a DELETE request.
+func (c *Client) delete(path string) error {
+	req, err := http.NewRequest("DELETE", c.baseURL+"/api/"+APIVersion+path, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("X-API-Key", c.apiKey)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
+		var errResp ErrorResponse
+		if err := json.NewDecoder(resp.Body).Decode(&errResp); err != nil {
+			respBody, _ := io.ReadAll(resp.Body)
+			return fmt.Errorf("API error (%d): %s", resp.StatusCode, string(respBody))
+		}
+		return fmt.Errorf("API error (%d): %s", resp.StatusCode, errResp.Error)
+	}
+
+	return nil
+}
+
+// Admin types
+
+// User represents an API user.
+type User struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Role       string `json:"role"`
+	CreatedAt  string `json:"created_at"`
+	LastSeenAt string `json:"last_seen_at,omitempty"`
+	IsActive   bool   `json:"is_active"`
+}
+
+// UsersResponse is the response from the users list endpoint.
+type UsersResponse struct {
+	Users []User `json:"users"`
+}
+
+// CreateUserRequest is the request body for creating a user.
+type CreateUserRequest struct {
+	Name string `json:"name"`
+	Role string `json:"role"`
+}
+
+// CreateUserResponse is the response from creating a user.
+type CreateUserResponse struct {
+	User   User   `json:"user"`
+	APIKey string `json:"api_key"`
+}
+
+// Setting represents a configuration setting.
+type Setting struct {
+	Key       string `json:"key"`
+	Value     string `json:"value"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+// SettingsResponse is the response from the settings endpoint.
+type SettingsResponse struct {
+	Settings []Setting `json:"settings"`
+}
+
+// ReindexStatus represents the reindex operation status.
+type ReindexStatus struct {
+	Running     bool   `json:"running"`
+	LastRun     string `json:"last_run,omitempty"`
+	LastStatus  string `json:"last_status,omitempty"`
+	DevicesFound int   `json:"devices_found,omitempty"`
+	DocsFound    int   `json:"documents_found,omitempty"`
+}
+
+// Admin methods
+
+// ListUsers lists all users (admin only).
+func (c *Client) ListUsers() (*UsersResponse, error) {
+	var resp UsersResponse
+	if err := c.get("/admin/users", &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// CreateUser creates a new user (admin only).
+func (c *Client) CreateUser(name, role string) (*CreateUserResponse, error) {
+	var resp CreateUserResponse
+	if err := c.post("/admin/users", CreateUserRequest{Name: name, Role: role}, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// DeleteUser deletes a user (admin only).
+func (c *Client) DeleteUser(id string) error {
+	return c.delete("/admin/users/" + id)
+}
+
+// RotateAPIKey rotates a user's API key (admin only).
+func (c *Client) RotateAPIKey(id string) (string, error) {
+	var resp struct {
+		APIKey string `json:"api_key"`
+	}
+	if err := c.post("/admin/users/"+id+"/rotate-key", nil, &resp); err != nil {
+		return "", err
+	}
+	return resp.APIKey, nil
+}
+
+// ListSettings lists all settings (admin only).
+func (c *Client) ListSettings() (*SettingsResponse, error) {
+	var resp SettingsResponse
+	if err := c.get("/admin/settings", &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// UpdateSetting updates a setting (admin only).
+func (c *Client) UpdateSetting(key, value string) error {
+	return c.put("/admin/settings/"+key, map[string]string{"value": value})
+}
+
+// TriggerReindex triggers a reindex operation (admin only).
+func (c *Client) TriggerReindex() error {
+	return c.post("/admin/reindex", nil, nil)
+}
+
+// GetReindexStatus gets the reindex status (admin only).
+func (c *Client) GetReindexStatus() (*ReindexStatus, error) {
+	var resp ReindexStatus
+	if err := c.get("/admin/reindex/status", &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
 }
 
 // APIKey returns the API key for use in proxied requests.

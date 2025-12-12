@@ -69,6 +69,18 @@ func (s *Server) Handler() http.Handler {
 	// Document proxy (to add auth header)
 	mux.HandleFunc("GET /download/{id}", s.handleDownload)
 
+	// Admin pages
+	mux.HandleFunc("GET /admin", s.handleAdmin)
+	mux.HandleFunc("GET /admin/users", s.handleAdminUsers)
+	mux.HandleFunc("POST /admin/users", s.handleAdminCreateUser)
+	mux.HandleFunc("DELETE /admin/users/{id}", s.handleAdminDeleteUser)
+	mux.HandleFunc("POST /admin/users/{id}/rotate-key", s.handleAdminRotateKey)
+	mux.HandleFunc("GET /admin/settings", s.handleAdminSettings)
+	mux.HandleFunc("PUT /admin/settings/{key}", s.handleAdminUpdateSetting)
+	mux.HandleFunc("GET /admin/reindex", s.handleAdminReindex)
+	mux.HandleFunc("POST /admin/reindex", s.handleAdminTriggerReindex)
+	mux.HandleFunc("GET /admin/reindex/status", s.handleAdminReindexStatus)
+
 	return s.loggingMiddleware(mux)
 }
 

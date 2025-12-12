@@ -26,9 +26,9 @@ type devicesData struct {
 }
 
 type deviceData struct {
-	Device   interface{}
-	Pinout   interface{}
-	Specs    interface{}
+	Device    interface{}
+	Pinout    interface{}
+	Specs     interface{}
 	Documents interface{}
 }
 
@@ -41,6 +41,19 @@ type documentsData struct {
 	Documents interface{}
 	Page      int
 	Total     int
+}
+
+type adminData struct {
+	Status interface{}
+}
+
+type usersData struct {
+	Users     interface{}
+	NewAPIKey string
+}
+
+type settingsData struct {
+	Settings interface{}
 }
 
 // Page handlers
@@ -277,4 +290,182 @@ func (s *Server) renderError(w http.ResponseWriter, message string, err error) {
 		Title:   "Error",
 		Content: message + ": " + err.Error(),
 	})
+}
+
+// Admin handlers
+
+func (s *Server) handleAdmin(w http.ResponseWriter, r *http.Request) {
+	status, err := s.client.GetStatus()
+	if err != nil {
+		s.renderError(w, "Failed to get status", err)
+		return
+	}
+
+	s.render(w, "admin.html", pageData{
+		Title:   "Admin",
+		Content: adminData{Status: status},
+	})
+}
+
+func (s *Server) handleAdminUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := s.client.ListUsers()
+	if err != nil {
+		s.renderError(w, "Failed to list users", err)
+		return
+	}
+
+	s.render(w, "admin-users.html", pageData{
+		Title:   "User Management",
+		Content: usersData{Users: users.Users},
+	})
+}
+
+func (s *Server) handleAdminCreateUser(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	name := r.FormValue("name")
+	role := r.FormValue("role")
+
+	if name == "" {
+		http.Error(w, "Name is required", http.StatusBadRequest)
+		return
+	}
+
+	resp, err := s.client.CreateUser(name, role)
+	if err != nil {
+		http.Error(w, "Failed to create user: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get updated user list
+	users, err := s.client.ListUsers()
+	if err != nil {
+		http.Error(w, "Failed to list users", http.StatusInternalServerError)
+		return
+	}
+
+	s.renderPartial(w, "partials/user-list.html", usersData{
+		Users:     users.Users,
+		NewAPIKey: resp.APIKey,
+	})
+}
+
+func (s *Server) handleAdminDeleteUser(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	if err := s.client.DeleteUser(id); err != nil {
+		http.Error(w, "Failed to delete user: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get updated user list
+	users, err := s.client.ListUsers()
+	if err != nil {
+		http.Error(w, "Failed to list users", http.StatusInternalServerError)
+		return
+	}
+
+	s.renderPartial(w, "partials/user-list.html", usersData{Users: users.Users})
+}
+
+func (s *Server) handleAdminRotateKey(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	apiKey, err := s.client.RotateAPIKey(id)
+	if err != nil {
+		http.Error(w, "Failed to rotate API key: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get updated user list
+	users, err := s.client.ListUsers()
+	if err != nil {
+		http.Error(w, "Failed to list users", http.StatusInternalServerError)
+		return
+	}
+
+	s.renderPartial(w, "partials/user-list.html", usersData{
+		Users:     users.Users,
+		NewAPIKey: apiKey,
+	})
+}
+
+func (s *Server) handleAdminSettings(w http.ResponseWriter, r *http.Request) {
+	settings, err := s.client.ListSettings()
+	if err != nil {
+		s.renderError(w, "Failed to list settings", err)
+		return
+	}
+
+	s.render(w, "admin-settings.html", pageData{
+		Title:   "Settings",
+		Content: settingsData{Settings: settings.Settings},
+	})
+}
+
+func (s *Server) handleAdminUpdateSetting(w http.ResponseWriter, r *http.Request) {
+	key := r.PathValue("key")
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	value := r.FormValue("value")
+
+	if err := s.client.UpdateSetting(key, value); err != nil {
+		http.Error(w, "Failed to update setting: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get updated settings list
+	settings, err := s.client.ListSettings()
+	if err != nil {
+		http.Error(w, "Failed to list settings", http.StatusInternalServerError)
+		return
+	}
+
+	s.renderPartial(w, "partials/settings-list.html", settingsData{Settings: settings.Settings})
+}
+
+func (s *Server) handleAdminReindex(w http.ResponseWriter, r *http.Request) {
+	status, err := s.client.GetReindexStatus()
+	if err != nil {
+		s.renderError(w, "Failed to get reindex status", err)
+		return
+	}
+
+	s.render(w, "admin-reindex.html", pageData{
+		Title:   "Reindex",
+		Content: status,
+	})
+}
+
+func (s *Server) handleAdminTriggerReindex(w http.ResponseWriter, r *http.Request) {
+	if err := s.client.TriggerReindex(); err != nil {
+		http.Error(w, "Failed to trigger reindex: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get updated status
+	status, err := s.client.GetReindexStatus()
+	if err != nil {
+		http.Error(w, "Failed to get reindex status", http.StatusInternalServerError)
+		return
+	}
+
+	s.renderPartial(w, "reindex-status-content", status)
+}
+
+func (s *Server) handleAdminReindexStatus(w http.ResponseWriter, r *http.Request) {
+	status, err := s.client.GetReindexStatus()
+	if err != nil {
+		http.Error(w, "Failed to get reindex status", http.StatusInternalServerError)
+		return
+	}
+
+	s.renderPartial(w, "reindex-status-content", status)
 }
