@@ -47,17 +47,39 @@
 
 ## Backend API Dependencies
 
-See `docs/API_TEAM_REQUESTS.md` for full list. Key blockers:
+See `docs/API_TEAM_REQUESTS.md` for full list.
 
-### 1. Status Endpoint Incorrect Counts (High Priority)
-**Issue**: `/api/2025.12/status` returns 1 device/1 document but search finds 37+
-**Impact**: Homepage shows misleading statistics
-**Status**: Reported to backend team (Request #5)
+### Resolved Issues ✅
+- **Status Endpoint Counts**: Fixed - now shows correct device/document counts
+- **CORS Security**: Fixed - configurable via `MANUALS_CORS_ORIGINS` env var
+- **Health Endpoint**: Enhanced with uptime, status levels, component checks
+- **Error Responses**: Standardized with `code` field
+- **Rate Limit Headers**: Added X-RateLimit-* headers
+- **Pagination Metadata**: Enhanced with has_next/has_prev
 
-### 2. CORS Security (Critical)
-**Issue**: Backend allows `Access-Control-Allow-Origin: *`
-**Impact**: Production security risk
-**Status**: Reported to backend team (Request #1)
+### Outstanding: Role-Based Permissions
+**Priority**: Medium
+**Issue**: The API defines three roles (admin, rw, ro) but RO and RW have identical access
+
+**Current State**:
+- `admin`: Full access including /admin/* endpoints ✅
+- `rw` (read-write): Same as read-only (no write endpoints exposed)
+- `ro` (read-only): Can access all non-admin endpoints
+
+**Needed**:
+1. Define what "write" operations RW users can perform:
+   - Add device notes/annotations?
+   - Create custom guides?
+   - Upload documents?
+   - Save search filters?
+2. Implement write endpoints for RW users
+3. Restrict RO users from those endpoints
+4. Update WebUI to show/hide features based on role
+
+**Files to Update**:
+- `manuals-api/internal/auth/auth.go` - Role enforcement
+- `manuals-api/internal/api/handlers.go` - New write endpoints
+- `manuals-webui/internal/server/templates/*.html` - Conditional UI
 
 ---
 

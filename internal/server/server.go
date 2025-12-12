@@ -30,6 +30,7 @@ type Server struct {
 	logger       *slog.Logger
 	baseTemplate *template.Template
 	funcMap      template.FuncMap
+	cachedUser   *client.User
 }
 
 // New creates a new server instance.
@@ -123,4 +124,20 @@ func truncate(s string, max int) string {
 		return s
 	}
 	return s[:max-3] + "..."
+}
+
+// getCurrentUser returns the cached current user, fetching if needed.
+func (s *Server) getCurrentUser() *client.User {
+	if s.cachedUser != nil {
+		return s.cachedUser
+	}
+
+	user, err := s.client.GetCurrentUser()
+	if err != nil {
+		s.logger.Warn("failed to get current user", "error", err)
+		return nil
+	}
+
+	s.cachedUser = user
+	return user
 }
