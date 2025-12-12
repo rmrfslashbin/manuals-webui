@@ -117,36 +117,47 @@ class DarkModeManager {
      * Create theme toggle button in navigation
      */
     createToggleButton() {
+        // Check if button already exists in HTML (from base.html)
+        const existingButton = document.getElementById('theme-toggle');
+        if (existingButton) {
+            // Use existing button, just add click handler
+            existingButton.addEventListener('click', () => {
+                this.toggleTheme();
+            });
+            this.updateToggleButton();
+            return;
+        }
+
         // Find navigation bar
         const nav = document.querySelector('nav.bg-indigo-600');
         if (!nav) return;
 
         // Create toggle button container
         const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'flex items-center ml-auto';
+        buttonContainer.className = 'hidden md:flex items-center';
         buttonContainer.id = 'theme-toggle-container';
 
-        // Create button
+        // Create button with text label
         const button = document.createElement('button');
         button.id = 'theme-toggle';
-        button.className = 'ml-4 p-2 text-indigo-200 hover:text-white hover:bg-indigo-500 rounded-md focus:outline-none focus:ring-2 focus:ring-white';
+        button.className = 'flex items-center space-x-1 px-3 py-2 text-indigo-200 hover:text-white hover:bg-indigo-500 rounded-md focus:outline-none focus:ring-2 focus:ring-white text-sm';
         button.setAttribute('aria-label', 'Toggle theme');
-        button.title = 'Toggle theme';
 
-        // Add SVG icons
+        // Add SVG icons and text label
         button.innerHTML = `
             <!-- Light mode icon -->
-            <svg class="h-5 w-5 hidden light-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-4 w-4 hidden light-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
             <!-- Dark mode icon -->
-            <svg class="h-5 w-5 hidden dark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-4 w-4 hidden dark-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
             <!-- Auto mode icon -->
-            <svg class="h-5 w-5 hidden auto-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-4 w-4 hidden auto-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
+            <span class="theme-label">Auto</span>
         `;
 
         button.addEventListener('click', () => {
@@ -174,7 +185,7 @@ class DarkModeManager {
     }
 
     /**
-     * Update toggle button icon based on current theme
+     * Update toggle button icon and label based on current theme
      */
     updateToggleButton() {
         const button = document.getElementById('theme-toggle');
@@ -185,13 +196,32 @@ class DarkModeManager {
             icon.classList.add('hidden');
         });
 
-        // Show appropriate icon
+        // Show appropriate icon and update label
+        const label = button.querySelector('.theme-label');
+        const effectiveTheme = this.getEffectiveTheme(this.currentTheme);
+
         if (this.currentTheme === 'light') {
             button.querySelector('.light-icon')?.classList.remove('hidden');
+            if (label) label.textContent = 'Light';
+            button.title = 'Theme: Light (click to switch to Dark)';
         } else if (this.currentTheme === 'dark') {
             button.querySelector('.dark-icon')?.classList.remove('hidden');
+            if (label) label.textContent = 'Dark';
+            button.title = 'Theme: Dark (click to switch to Auto)';
         } else {
             button.querySelector('.auto-icon')?.classList.remove('hidden');
+            if (label) label.textContent = `Auto (${effectiveTheme})`;
+            button.title = `Theme: Auto - using ${effectiveTheme} based on system (click to switch to Light)`;
+        }
+
+        // Also update mobile theme toggle text if present
+        const mobileThemeText = document.getElementById('mobile-theme-text');
+        if (mobileThemeText) {
+            if (this.currentTheme === 'auto') {
+                mobileThemeText.textContent = `Theme: Auto (${effectiveTheme})`;
+            } else {
+                mobileThemeText.textContent = `Theme: ${this.currentTheme.charAt(0).toUpperCase() + this.currentTheme.slice(1)}`;
+            }
         }
     }
 
