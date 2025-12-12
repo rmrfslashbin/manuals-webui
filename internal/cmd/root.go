@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -59,6 +60,9 @@ func init() {
 }
 
 func initConfig() {
+	// Load .env file if present (godotenv)
+	_ = godotenv.Load()
+
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
@@ -75,6 +79,13 @@ func initConfig() {
 	viper.SetEnvPrefix("MANUALS")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
+
+	// Explicit env bindings (AutomaticEnv only works for known keys)
+	_ = viper.BindEnv("api.url", "MANUALS_API_URL")
+	_ = viper.BindEnv("api.key", "MANUALS_API_KEY")
+	_ = viper.BindEnv("server.host", "MANUALS_SERVER_HOST")
+	_ = viper.BindEnv("server.port", "MANUALS_SERVER_PORT")
+	_ = viper.BindEnv("log.level", "MANUALS_LOG_LEVEL")
 
 	// Read config file if it exists
 	if err := viper.ReadInConfig(); err == nil {
