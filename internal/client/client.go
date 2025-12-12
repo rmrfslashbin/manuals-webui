@@ -309,7 +309,10 @@ func (c *Client) get(path string, result interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("X-API-Key", c.apiKey)
+	// Only add API key header if configured (allows anonymous access)
+	if c.apiKey != "" {
+		req.Header.Set("X-API-Key", c.apiKey)
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -348,7 +351,10 @@ func (c *Client) post(path string, body interface{}, result interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("X-API-Key", c.apiKey)
+	// Only add API key header if configured (allows anonymous access)
+	if c.apiKey != "" {
+		req.Header.Set("X-API-Key", c.apiKey)
+	}
 	if body != nil {
 		req.Header.Set("Content-Type", "application/json")
 	}
@@ -388,7 +394,10 @@ func (c *Client) put(path string, body interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("X-API-Key", c.apiKey)
+	// Only add API key header if configured (allows anonymous access)
+	if c.apiKey != "" {
+		req.Header.Set("X-API-Key", c.apiKey)
+	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.httpClient.Do(req)
@@ -415,7 +424,10 @@ func (c *Client) delete(path string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("X-API-Key", c.apiKey)
+	// Only add API key header if configured (allows anonymous access)
+	if c.apiKey != "" {
+		req.Header.Set("X-API-Key", c.apiKey)
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {

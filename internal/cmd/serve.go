@@ -44,8 +44,11 @@ func runServe(cmd *cobra.Command, args []string) error {
 	if apiURL == "" {
 		return fmt.Errorf("MANUALS_API_URL is required")
 	}
-	if apiKey == "" {
-		return fmt.Errorf("MANUALS_API_KEY is required")
+
+	// API key is now optional - allows anonymous read-only access
+	anonymousMode := apiKey == ""
+	if anonymousMode {
+		logger.Info("running in anonymous mode (read-only access)")
 	}
 
 	// Create API client
@@ -61,6 +64,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		"api_version", status.APIVersion,
 		"devices", status.Counts.Devices,
 		"documents", status.Counts.Documents,
+		"anonymous_mode", anonymousMode,
 	)
 
 	// Create server

@@ -10,16 +10,10 @@ import (
 
 // Page data structures
 type pageData struct {
-	Title       string
-	Content     interface{}
-	CurrentUser *currentUserData
+	Title   string
+	Content interface{}
 }
 
-type currentUserData struct {
-	Name   string
-	Role   string
-	IsAdmin bool
-}
 
 type homeData struct {
 	Status interface{}
@@ -291,20 +285,6 @@ func (s *Server) handleDownload(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) render(w http.ResponseWriter, name string, data interface{}) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-
-	// Inject current user into pageData if applicable
-	if pd, ok := data.(pageData); ok {
-		if pd.CurrentUser == nil {
-			if user := s.getCurrentUser(); user != nil {
-				pd.CurrentUser = &currentUserData{
-					Name:    user.Name,
-					Role:    user.Role,
-					IsAdmin: user.Role == "admin",
-				}
-			}
-		}
-		data = pd
-	}
 
 	// Clone base template and parse the specific page template
 	tmpl, err := s.baseTemplate.Clone()
