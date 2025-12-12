@@ -60,6 +60,9 @@ func (s *Server) Handler() http.Handler {
 	staticContent, _ := fs.Sub(staticFS, "static")
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticContent))))
 
+	// Health check proxy (no auth required)
+	mux.HandleFunc("GET /health", s.handleHealth)
+
 	// Configuration pages
 	mux.HandleFunc("GET /setup", s.handleSetup)
 	mux.HandleFunc("GET /settings", s.handleSettings)

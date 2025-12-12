@@ -514,3 +514,19 @@ func (s *Server) handleAdminReindexStatus(w http.ResponseWriter, r *http.Request
 
 	s.renderPartial(w, "reindex-status-content", status)
 }
+
+// handleHealth proxies health check requests to the API server
+func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
+	// Get health status from API
+	health, err := s.client.GetHealth()
+	if err != nil {
+		s.logger.Error("health check failed", "error", err)
+		http.Error(w, "Health check failed", http.StatusServiceUnavailable)
+		return
+	}
+
+	// Return health status as JSON
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(health)
+}

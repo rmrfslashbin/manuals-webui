@@ -263,6 +263,32 @@ func (c *Client) GetStatus() (*StatusResponse, error) {
 	return &resp, nil
 }
 
+// GetHealth gets the API health check (no auth required, returns raw JSON).
+func (c *Client) GetHealth() ([]byte, error) {
+	req, err := http.NewRequest("GET", c.baseURL+"/health", nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	// Note: No API key header - health endpoint doesn't require auth
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("health check failed with status %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	return body, nil
+}
+
 // get performs a GET request and decodes the JSON response.
 func (c *Client) get(path string, result interface{}) error {
 	req, err := http.NewRequest("GET", c.baseURL+"/api/"+APIVersion+path, nil)
