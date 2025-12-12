@@ -1,0 +1,102 @@
+// Package server provides the HTTP server for the web UI.
+package server
+
+import (
+	"embed"
+	"fmt"
+	"html/template"
+	"io/fs"
+	"log/slog"
+	"net/http"
+
+	"github.com/rmrfslashbin/manuals-webui/internal/client"
+)
+
+//go:embed templates/*.html templates/**/*.html
+var templatesFS embed.FS
+
+//go:embed static/*
+var staticFS embed.FS
+
+// Config holds the server configuration.
+type Config struct {
+	Client *client.Client
+	Logger *slog.Logger
+}
+
+// Server is the web UI server.
+type Server struct {
+	client    *client.Client
+	logger    *slog.Logger
+	templates *template.Template
+}
+
+// New creates a new server instance.
+func New(cfg Config) *Server {
+	// Parse templates
+	tmpl := template.Must(template.New("").Funcs(template.FuncMap{
+		"formatBytes": formatBytes,
+		"truncate":    truncate,
+		"add":         func(a, b int) int { return a + b },
+	}).ParseFS(templatesFS, "templates/*.html", "templates/**/*.html"))
+
+	return &Server{
+		client:    cfg.Client,
+		logger:    cfg.Logger,
+		templates: tmpl,
+	}
+}
+
+// Handler returns the HTTP handler for the server.
+func (s *Server) Handler() http.Handler {
+	mux := http.NewServeMux()
+
+	// Static files
+	staticContent, _ := fs.Sub(staticFS, "static")
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticContent))))
+
+	// Pages
+	mux.HandleFunc("GET /", s.handleHome)
+	mux.HandleFunc("GET /devices", s.handleDevices)
+	mux.HandleFunc("GET /devices/{id}", s.handleDevice)
+	mux.HandleFunc("GET /search", s.handleSearch)
+	mux.HandleFunc("GET /documents", s.handleDocuments)
+
+	// htmx partials
+	mux.HandleFunc("GET /partials/devices", s.handleDevicesPartial)
+	mux.HandleFunc("GET /partials/search-results", s.handleSearchResultsPartial)
+
+	// Document proxy (to add auth header)
+	mux.HandleFunc("GET /download/{id}", s.handleDownload)
+
+	return s.loggingMiddleware(mux)
+}
+
+func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.logger.Debug("request", "method", r.Method, "path", r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Helper functions for templates
+func formatBytes(b int64) string {
+	const unit = 1024
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	units := []string{"KB", "MB", "GB", "TB"}
+	return fmt.Sprintf("%.1f %s", float64(b)/float64(div), units[exp])
+}
+
+func truncate(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+	return s[:max-3] + "..."
+}

@@ -1,0 +1,69 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-gray-900">Documents</h1>
+        <p class="mt-1 text-sm text-gray-500">Browse and download datasheets and documentation files</p>
+    </div>
+
+    <!-- Documents List -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul role="list" class="divide-y divide-gray-200">
+            {{range .Content.Documents}}
+            <li>
+                <a href="/download/{{.ID}}" class="block hover:bg-gray-50">
+                    <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <p class="truncate text-sm font-medium text-indigo-600">{{.Filename}}</p>
+                            </div>
+                            <div class="ml-2 flex flex-shrink-0 items-center gap-4">
+                                <span class="text-sm text-gray-500">{{formatBytes .SizeBytes}}</span>
+                                <span class="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+                                    {{.MimeType}}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            {{.Path}}
+                        </div>
+                    </div>
+                </a>
+            </li>
+            {{else}}
+            <li class="px-4 py-8 text-center text-gray-500">
+                No documents found
+            </li>
+            {{end}}
+        </ul>
+    </div>
+
+    <!-- Pagination -->
+    {{if gt .Content.Total 20}}
+    <nav class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg shadow">
+        <div class="hidden sm:block">
+            <p class="text-sm text-gray-700">
+                Showing page <span class="font-medium">{{.Content.Page}}</span> of
+                <span class="font-medium">{{.Content.Total}}</span> documents
+            </p>
+        </div>
+        <div class="flex flex-1 justify-between sm:justify-end gap-2">
+            {{if gt .Content.Page 1}}
+            <a href="/documents?page={{printf "%d" (add .Content.Page -1)}}"
+               class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                Previous
+            </a>
+            {{end}}
+            <a href="/documents?page={{printf "%d" (add .Content.Page 1)}}"
+               class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                Next
+            </a>
+        </div>
+    </nav>
+    {{end}}
+</div>
+{{end}}

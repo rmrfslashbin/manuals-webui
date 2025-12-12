@@ -1,0 +1,53 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}} - Manuals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline;
+        }
+        .htmx-request.htmx-indicator {
+            display: inline;
+        }
+    </style>
+</head>
+<body class="h-full bg-gray-50">
+    <div class="min-h-full">
+        {{template "nav" .}}
+        <main class="py-6">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                {{template "content" .}}
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+{{end}}
+
+{{define "nav"}}
+<nav class="bg-indigo-600">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-white font-bold text-xl">Manuals</span>
+                </div>
+                <div class="ml-10 flex items-baseline space-x-4">
+                    <a href="/" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Home</a>
+                    <a href="/devices" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Devices</a>
+                    <a href="/documents" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Documents</a>
+                    <a href="/search" class="text-white hover:bg-indigo-500 rounded-md px-3 py-2 text-sm font-medium">Search</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+{{end}}
