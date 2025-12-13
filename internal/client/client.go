@@ -263,20 +263,6 @@ func (c *Client) GetStatus() (*StatusResponse, error) {
 	return &resp, nil
 }
 
-// MeResponse is the response from the /me endpoint.
-type MeResponse struct {
-	User User `json:"user"`
-}
-
-// GetCurrentUser gets the currently authenticated user.
-func (c *Client) GetCurrentUser() (*User, error) {
-	var resp MeResponse
-	if err := c.get("/me", &resp); err != nil {
-		return nil, err
-	}
-	return &resp.User, nil
-}
-
 // GetHealth gets the API health check (no auth required, returns raw JSON).
 func (c *Client) GetHealth() ([]byte, error) {
 	req, err := http.NewRequest("GET", c.baseURL+"/health", nil)
