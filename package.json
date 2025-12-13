@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/rmrfslashbin/manuals-webui#readme",
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
     "tailwindcss": "^3.4.19"
   }
 }

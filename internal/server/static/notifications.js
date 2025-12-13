@@ -179,16 +179,5 @@ document.addEventListener('htmx:sendError', () => {
     notifications.error('Network error. Please check your connection.');
 });
 
-// Handle API configuration errors
-window.addEventListener('DOMContentLoaded', () => {
-    // Check if we're on a page that requires API configuration
-    const currentPath = window.location.pathname;
-    const publicPages = ['/setup', '/settings'];
-
-    if (!publicPages.includes(currentPath)) {
-        const configured = sessionStorage.getItem('manuals_configured');
-        if (!configured) {
-            notifications.warning('API not configured. Redirecting to setup...', 2000);
-        }
-    }
-});
+// API configuration is optional - users can browse in read-only mode without setup
+// Configuration check removed to allow anonymous access
