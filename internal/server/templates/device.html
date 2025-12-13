@@ -39,9 +39,9 @@
             {{if .Content}}
             <div class="bg-white shadow sm:rounded-lg">
                 <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Documentation</h3>
-                    <div class="prose prose-sm max-w-none">
-                        <pre class="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 p-4 rounded-lg overflow-auto max-h-96">{{.Content}}</pre>
+                    <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100 mb-4">Documentation</h3>
+                    <div class="prose prose-sm max-w-none dark:prose-invert overflow-auto max-h-96">
+                        {{markdown .Content}}
                     </div>
                 </div>
             </div>

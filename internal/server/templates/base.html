@@ -243,18 +243,9 @@
 
     <!-- Configuration Check & Offline Detection -->
     <script>
-        // Check if we're already on setup or settings page
-        const currentPath = window.location.pathname;
-        if (currentPath !== '/setup' && currentPath !== '/settings') {
-            // Check if configuration exists
-            const configured = sessionStorage.getItem('manuals_configured');
-            if (!configured) {
-                // Redirect to setup (after brief delay for notification)
-                setTimeout(() => {
-                    window.location.href = '/setup';
-                }, 2000);
-            }
-        }
+        // Anonymous read-only access is enabled by default
+        // Users can navigate to /setup manually if they want to configure an API key
+        // No automatic redirect to setup page
 
         // Offline/Online detection
         function updateOnlineStatus() {

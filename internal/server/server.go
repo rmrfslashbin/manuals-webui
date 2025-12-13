@@ -30,15 +30,21 @@ type Server struct {
 	logger       *slog.Logger
 	baseTemplate *template.Template
 	funcMap      template.FuncMap
+	mdRenderer   *MarkdownRenderer
 }
 
 // New creates a new server instance.
 func New(cfg Config) *Server {
+	// Initialize markdown renderer
+	mdRenderer := newMarkdownRenderer()
+
 	// Create function map for templates
 	funcMap := template.FuncMap{
-		"formatBytes": formatBytes,
-		"truncate":    truncate,
-		"add":         func(a, b int) int { return a + b },
+		"formatBytes":    formatBytes,
+		"truncate":       truncate,
+		"add":            func(a, b int) int { return a + b },
+		"markdown":       mdRenderer.RenderMarkdown,
+		"markdownInline": mdRenderer.RenderMarkdownInline,
 	}
 
 	// Parse base template only
@@ -49,6 +55,7 @@ func New(cfg Config) *Server {
 		logger:       cfg.Logger,
 		baseTemplate: baseTemplate,
 		funcMap:      funcMap,
+		mdRenderer:   mdRenderer,
 	}
 }
 
