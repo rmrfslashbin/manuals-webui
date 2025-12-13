@@ -797,3 +797,188 @@ func TestInvalidJSONResponse(t *testing.T) {
 		t.Errorf("expected 'failed to decode' error, got: %v", err)
 	}
 }
+
+func TestGetDeviceRefs(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.URL.Path, "/devices/test-device/refs") {
+			t.Errorf("unexpected path: %s", r.URL.Path)
+		}
+		json.NewEncoder(w).Encode(RefsResponse{
+			DeviceID: "test-device",
+			Name:     "Test Device",
+			References: []Reference{
+				{Type: "datasheet", Title: "Datasheet PDF", URL: "http://example.com/ds.pdf"},
+				{Type: "related", Title: "Related Device", ID: "related-device"},
+			},
+		})
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "test-key")
+	resp, err := client.GetDeviceRefs("test-device")
+	if err != nil {
+		t.Fatalf("GetDeviceRefs failed: %v", err)
+	}
+	if resp.DeviceID != "test-device" {
+		t.Errorf("expected device_id test-device, got %s", resp.DeviceID)
+	}
+	if len(resp.References) != 2 {
+		t.Errorf("expected 2 references, got %d", len(resp.References))
+	}
+}
+
+func TestGetDeviceRefsNotFound(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "device not found"})
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "test-key")
+	_, err := client.GetDeviceRefs("nonexistent")
+	if err == nil {
+		t.Fatal("expected error for nonexistent device")
+	}
+	if !strings.Contains(err.Error(), "device not found") {
+		t.Errorf("expected 'device not found' error, got: %v", err)
+	}
+}
+
+func TestListGuides(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasPrefix(r.URL.Path, "/api/"+APIVersion+"/guides") {
+			t.Errorf("unexpected path: %s", r.URL.Path)
+		}
+		json.NewEncoder(w).Encode(GuidesResponse{
+			Data: []Guide{
+				{ID: "guide-1", Title: "Getting Started", Path: "guides/getting-started.md"},
+				{ID: "guide-2", Title: "Advanced Topics", Path: "guides/advanced.md"},
+			},
+			Total:  2,
+			Limit:  50,
+			Offset: 0,
+		})
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "test-key")
+	resp, err := client.ListGuides(0, 0)
+	if err != nil {
+		t.Fatalf("ListGuides failed: %v", err)
+	}
+	if resp.Total != 2 {
+		t.Errorf("expected total 2, got %d", resp.Total)
+	}
+	if len(resp.Data) != 2 {
+		t.Errorf("expected 2 guides, got %d", len(resp.Data))
+	}
+}
+
+func TestListGuidesWithPagination(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("limit") != "10" {
+			t.Errorf("expected limit=10, got %s", r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("offset") != "5" {
+			t.Errorf("expected offset=5, got %s", r.URL.Query().Get("offset"))
+		}
+		json.NewEncoder(w).Encode(GuidesResponse{Total: 0})
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "test-key")
+	_, err := client.ListGuides(10, 5)
+	if err != nil {
+		t.Fatalf("ListGuides with pagination failed: %v", err)
+	}
+}
+
+func TestGetGuide(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.URL.Path, "/guides/guide-123") {
+			t.Errorf("unexpected path: %s", r.URL.Path)
+		}
+		json.NewEncoder(w).Encode(Guide{
+			ID:      "guide-123",
+			Title:   "Test Guide",
+			Path:    "guides/test.md",
+			Content: "# Test Guide Content\n\nThis is a test guide.",
+		})
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "test-key")
+	guide, err := client.GetGuide("guide-123")
+	if err != nil {
+		t.Fatalf("GetGuide failed: %v", err)
+	}
+	if guide.ID != "guide-123" {
+		t.Errorf("expected ID guide-123, got %s", guide.ID)
+	}
+	if guide.Title != "Test Guide" {
+		t.Errorf("expected title 'Test Guide', got %s", guide.Title)
+	}
+	if guide.Content == "" {
+		t.Error("expected content to be set")
+	}
+}
+
+func TestGetGuideNotFound(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "guide not found"})
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "test-key")
+	_, err := client.GetGuide("nonexistent")
+	if err == nil {
+		t.Fatal("expected error for nonexistent guide")
+	}
+	if !strings.Contains(err.Error(), "guide not found") {
+		t.Errorf("expected 'guide not found' error, got: %v", err)
+	}
+}
+
+func TestUpdateUserRole(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "PUT" {
+			t.Errorf("expected PUT, got %s", r.Method)
+		}
+		if !strings.Contains(r.URL.Path, "/admin/users/user-123/role") {
+			t.Errorf("unexpected path: %s", r.URL.Path)
+		}
+
+		var body map[string]string
+		json.NewDecoder(r.Body).Decode(&body)
+		if body["role"] != "rw" {
+			t.Errorf("expected role rw, got %s", body["role"])
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "admin-key")
+	err := client.UpdateUserRole("user-123", "rw")
+	if err != nil {
+		t.Fatalf("UpdateUserRole failed: %v", err)
+	}
+}
+
+func TestUpdateUserRoleError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "insufficient permissions"})
+	}))
+	defer server.Close()
+
+	client := New(server.URL, "test-key")
+	err := client.UpdateUserRole("user-123", "admin")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if !strings.Contains(err.Error(), "insufficient permissions") {
+		t.Errorf("expected 'insufficient permissions' error, got: %v", err)
+	}
+}
