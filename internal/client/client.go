@@ -215,6 +215,46 @@ func (c *Client) GetDeviceSpecs(id string) (*SpecsResponse, error) {
 	return &resp, nil
 }
 
+// GetDeviceRefs gets the references for a device.
+func (c *Client) GetDeviceRefs(id string) (*RefsResponse, error) {
+	var resp RefsResponse
+	if err := c.get("/devices/"+id+"/refs", &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// ListGuides lists guides with pagination.
+func (c *Client) ListGuides(limit, offset int) (*GuidesResponse, error) {
+	params := url.Values{}
+	if limit > 0 {
+		params.Set("limit", fmt.Sprintf("%d", limit))
+	}
+	if offset > 0 {
+		params.Set("offset", fmt.Sprintf("%d", offset))
+	}
+
+	path := "/guides"
+	if len(params) > 0 {
+		path += "?" + params.Encode()
+	}
+
+	var resp GuidesResponse
+	if err := c.get(path, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// GetGuide gets a guide by ID.
+func (c *Client) GetGuide(id string) (*Guide, error) {
+	var resp Guide
+	if err := c.get("/guides/"+id, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 // ListDocuments lists documents with pagination.
 func (c *Client) ListDocuments(limit, offset int, deviceID string) (*DocumentsResponse, error) {
 	params := url.Values{}
@@ -476,11 +516,43 @@ type SettingsResponse struct {
 
 // ReindexStatus represents the reindex operation status.
 type ReindexStatus struct {
-	Running     bool   `json:"running"`
-	LastRun     string `json:"last_run,omitempty"`
-	LastStatus  string `json:"last_status,omitempty"`
-	DevicesFound int   `json:"devices_found,omitempty"`
-	DocsFound    int   `json:"documents_found,omitempty"`
+	Running      bool   `json:"running"`
+	LastRun      string `json:"last_run,omitempty"`
+	LastStatus   string `json:"last_status,omitempty"`
+	DevicesFound int    `json:"devices_found,omitempty"`
+	DocsFound    int    `json:"documents_found,omitempty"`
+}
+
+// Reference represents a device reference (related device or external link).
+type Reference struct {
+	Type  string `json:"type"`
+	Title string `json:"title"`
+	URL   string `json:"url,omitempty"`
+	ID    string `json:"id,omitempty"`
+}
+
+// RefsResponse is the response from the device refs endpoint.
+type RefsResponse struct {
+	DeviceID   string      `json:"device_id"`
+	Name       string      `json:"name"`
+	References []Reference `json:"references"`
+}
+
+// Guide represents a documentation guide.
+type Guide struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Path      string `json:"path"`
+	Content   string `json:"content,omitempty"`
+	IndexedAt string `json:"indexed_at"`
+}
+
+// GuidesResponse is the response from the guides list endpoint.
+type GuidesResponse struct {
+	Data   []Guide `json:"data"`
+	Total  int     `json:"total"`
+	Limit  int     `json:"limit"`
+	Offset int     `json:"offset"`
 }
 
 // Admin methods
@@ -506,6 +578,11 @@ func (c *Client) CreateUser(name, role string) (*CreateUserResponse, error) {
 // DeleteUser deletes a user (admin only).
 func (c *Client) DeleteUser(id string) error {
 	return c.delete("/admin/users/" + id)
+}
+
+// UpdateUserRole updates a user's role (admin only).
+func (c *Client) UpdateUserRole(id, role string) error {
+	return c.put("/admin/users/"+id+"/role", map[string]string{"role": role})
 }
 
 // RotateAPIKey rotates a user's API key (admin only).
