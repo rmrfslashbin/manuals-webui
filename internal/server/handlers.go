@@ -35,8 +35,10 @@ type deviceData struct {
 }
 
 type searchData struct {
-	Query   string
-	Results interface{}
+	Query          string
+	Mode           string // "keyword" or "semantic"
+	Results        interface{}
+	SemanticError  string // Set if semantic search fails (e.g., not enabled)
 }
 
 type documentsData struct {
@@ -151,22 +153,47 @@ func (s *Server) handleDevice(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
+	mode := r.URL.Query().Get("mode")
+	if mode == "" {
+		mode = "keyword" // Default to keyword search
+	}
 
 	var results interface{}
+	var semanticError string
+
 	if query != "" {
-		resp, err := s.client.Search(query, 50, "", "")
-		if err != nil {
-			s.renderError(w, "Search failed", err)
-			return
+		if mode == "semantic" {
+			resp, err := s.client.SemanticSearch(query, 50, "", "")
+			if err != nil {
+				// If semantic search fails, fall back to keyword search with a notice
+				semanticError = err.Error()
+				keywordResp, keywordErr := s.client.Search(query, 50, "", "")
+				if keywordErr != nil {
+					s.renderError(w, "Search failed", keywordErr)
+					return
+				}
+				results = keywordResp.Results
+				mode = "keyword" // Reset mode since we fell back
+			} else {
+				results = resp.Results
+			}
+		} else {
+			resp, err := s.client.Search(query, 50, "", "")
+			if err != nil {
+				s.renderError(w, "Search failed", err)
+				return
+			}
+			results = resp.Results
 		}
-		results = resp.Results
 	}
 
 	s.render(w, "search.html", pageData{
 		Title: "Search",
 		Content: searchData{
-			Query:   query,
-			Results: results,
+			Query:         query,
+			Mode:          mode,
+			Results:       results,
+			SemanticError: semanticError,
 		},
 	})
 }
@@ -226,21 +253,48 @@ func (s *Server) handleDevicesPartial(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleSearchResultsPartial(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
+	mode := r.URL.Query().Get("mode")
+	if mode == "" {
+		mode = "keyword"
+	}
 
 	if query == "" {
 		w.Write([]byte(""))
 		return
 	}
 
-	results, err := s.client.Search(query, 50, "", "")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	var results interface{}
+	var semanticError string
+
+	if mode == "semantic" {
+		resp, err := s.client.SemanticSearch(query, 50, "", "")
+		if err != nil {
+			// Fall back to keyword search with error message
+			semanticError = err.Error()
+			keywordResp, keywordErr := s.client.Search(query, 50, "", "")
+			if keywordErr != nil {
+				http.Error(w, keywordErr.Error(), http.StatusInternalServerError)
+				return
+			}
+			results = keywordResp.Results
+			mode = "keyword"
+		} else {
+			results = resp.Results
+		}
+	} else {
+		resp, err := s.client.Search(query, 50, "", "")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		results = resp.Results
 	}
 
 	s.renderPartial(w, "partials/search-results.html", searchData{
-		Query:   query,
-		Results: results.Results,
+		Query:         query,
+		Mode:          mode,
+		Results:       results,
+		SemanticError: semanticError,
 	})
 }
 

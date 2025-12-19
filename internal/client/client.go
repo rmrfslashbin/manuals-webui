@@ -52,6 +52,24 @@ type SearchResponse struct {
 	Query   string         `json:"query"`
 }
 
+// SemanticSearchResult represents a result from semantic search.
+type SemanticSearchResult struct {
+	DeviceID string  `json:"device_id"`
+	Name     string  `json:"name"`
+	Domain   string  `json:"domain"`
+	Type     string  `json:"type"`
+	Heading  string  `json:"heading"`
+	Content  string  `json:"content"`
+	Score    float32 `json:"score"`
+}
+
+// SemanticSearchResponse is the response from the semantic search endpoint.
+type SemanticSearchResponse struct {
+	Query   string                 `json:"query"`
+	Count   int                    `json:"count"`
+	Results []SemanticSearchResult `json:"results"`
+}
+
 // Device represents a device.
 type Device struct {
 	ID        string                 `json:"id"`
@@ -135,7 +153,7 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// Search searches for devices.
+// Search searches for devices using keyword/FTS5 search.
 func (c *Client) Search(query string, limit int, domain, deviceType string) (*SearchResponse, error) {
 	params := url.Values{}
 	params.Set("q", query)
@@ -151,6 +169,28 @@ func (c *Client) Search(query string, limit int, domain, deviceType string) (*Se
 
 	var resp SearchResponse
 	if err := c.get("/search?"+params.Encode(), &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// SemanticSearch performs semantic/vector search using embeddings.
+// Returns results ranked by semantic similarity to the query.
+func (c *Client) SemanticSearch(query string, limit int, domain, deviceType string) (*SemanticSearchResponse, error) {
+	params := url.Values{}
+	params.Set("q", query)
+	if limit > 0 {
+		params.Set("limit", fmt.Sprintf("%d", limit))
+	}
+	if domain != "" {
+		params.Set("domain", domain)
+	}
+	if deviceType != "" {
+		params.Set("type", deviceType)
+	}
+
+	var resp SemanticSearchResponse
+	if err := c.get("/search/semantic?"+params.Encode(), &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
