@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/rmrfslashbin/manuals-webui/internal/client"
 )
 
 // Page data structures
@@ -34,10 +36,20 @@ type deviceData struct {
 	Documents interface{}
 }
 
+// UnifiedSearchResult is a common format for both keyword and semantic search results
+type UnifiedSearchResult struct {
+	DeviceID string
+	Name     string
+	Domain   string
+	Type     string
+	Score    float64
+	Snippet  string // Content preview (from Snippet or Content field)
+}
+
 type searchData struct {
 	Query          string
 	Mode           string // "keyword" or "semantic"
-	Results        interface{}
+	Results        []UnifiedSearchResult
 	SemanticError  string // Set if semantic search fails (e.g., not enabled)
 }
 
@@ -158,7 +170,7 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		mode = "keyword" // Default to keyword search
 	}
 
-	var results interface{}
+	var results []UnifiedSearchResult
 	var semanticError string
 
 	if query != "" {
@@ -172,10 +184,10 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 					s.renderError(w, "Search failed", keywordErr)
 					return
 				}
-				results = keywordResp.Results
+				results = convertKeywordResults(keywordResp.Results)
 				mode = "keyword" // Reset mode since we fell back
 			} else {
-				results = resp.Results
+				results = convertSemanticResults(resp.Results)
 			}
 		} else {
 			resp, err := s.client.Search(query, 50, "", "")
@@ -183,7 +195,7 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 				s.renderError(w, "Search failed", err)
 				return
 			}
-			results = resp.Results
+			results = convertKeywordResults(resp.Results)
 		}
 	}
 
@@ -196,6 +208,38 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 			SemanticError: semanticError,
 		},
 	})
+}
+
+// convertKeywordResults converts keyword search results to unified format
+func convertKeywordResults(results []client.SearchResult) []UnifiedSearchResult {
+	unified := make([]UnifiedSearchResult, len(results))
+	for i, r := range results {
+		unified[i] = UnifiedSearchResult{
+			DeviceID: r.DeviceID,
+			Name:     r.Name,
+			Domain:   r.Domain,
+			Type:     r.Type,
+			Score:    r.Score,
+			Snippet:  r.Snippet,
+		}
+	}
+	return unified
+}
+
+// convertSemanticResults converts semantic search results to unified format
+func convertSemanticResults(results []client.SemanticSearchResult) []UnifiedSearchResult {
+	unified := make([]UnifiedSearchResult, len(results))
+	for i, r := range results {
+		unified[i] = UnifiedSearchResult{
+			DeviceID: r.DeviceID,
+			Name:     r.Name,
+			Domain:   r.Domain,
+			Type:     r.Type,
+			Score:    float64(r.Score),
+			Snippet:  r.Content,
+		}
+	}
+	return unified
 }
 
 func (s *Server) handleDocuments(w http.ResponseWriter, r *http.Request) {
@@ -263,7 +307,7 @@ func (s *Server) handleSearchResultsPartial(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var results interface{}
+	var results []UnifiedSearchResult
 	var semanticError string
 
 	if mode == "semantic" {
@@ -276,10 +320,10 @@ func (s *Server) handleSearchResultsPartial(w http.ResponseWriter, r *http.Reque
 				http.Error(w, keywordErr.Error(), http.StatusInternalServerError)
 				return
 			}
-			results = keywordResp.Results
+			results = convertKeywordResults(keywordResp.Results)
 			mode = "keyword"
 		} else {
-			results = resp.Results
+			results = convertSemanticResults(resp.Results)
 		}
 	} else {
 		resp, err := s.client.Search(query, 50, "", "")
@@ -287,7 +331,7 @@ func (s *Server) handleSearchResultsPartial(w http.ResponseWriter, r *http.Reque
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		results = resp.Results
+		results = convertKeywordResults(resp.Results)
 	}
 
 	s.renderPartial(w, "partials/search-results.html", searchData{
@@ -427,14 +471,18 @@ func (s *Server) handleAdminCreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := r.FormValue("name")
-	role := r.FormValue("role")
+	preset := r.FormValue("preset")
 
 	if name == "" {
 		http.Error(w, "Name is required", http.StatusBadRequest)
 		return
 	}
 
-	resp, err := s.client.CreateUser(name, role)
+	if preset == "" {
+		preset = "readonly" // Default to readonly preset
+	}
+
+	resp, err := s.client.CreateUser(name, preset)
 	if err != nil {
 		http.Error(w, "Failed to create user: "+err.Error(), http.StatusInternalServerError)
 		return

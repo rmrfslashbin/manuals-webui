@@ -241,11 +241,236 @@
         </main>
     </div>
 
+    <!-- API Server Configuration Modal -->
+    <div id="api-server-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" id="api-modal-backdrop"></div>
+            <span class="hidden sm:inline-block sm:h-screen sm:align-middle">&#8203;</span>
+            <div class="relative inline-block transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 sm:align-middle">
+                <div>
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+                        <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-5">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">API Server Configuration</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Confirm or update the API server URL to connect to.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <form id="api-server-form" class="mt-5 sm:mt-6">
+                    <div class="mb-4">
+                        <label for="modal-api-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">API Server URL</label>
+                        <input type="url" id="modal-api-url" name="api-url" required
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2"
+                               placeholder="http://manuals.local:8080">
+                    </div>
+                    <div id="api-server-error" class="hidden mb-4 text-sm text-red-600 dark:text-red-400"></div>
+                    <div id="api-server-success" class="hidden mb-4 text-sm text-green-600 dark:text-green-400"></div>
+                    <div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                        <button type="submit" class="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-2 sm:text-sm">
+                            Connect
+                        </button>
+                        <button type="button" id="api-modal-skip" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-1 sm:mt-0 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600">
+                            Use Default
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" id="login-modal-backdrop"></div>
+            <span class="hidden sm:inline-block sm:h-screen sm:align-middle">&#8203;</span>
+            <div class="relative inline-block transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 sm:align-middle">
+                <div class="absolute top-0 right-0 pt-4 pr-4">
+                    <button type="button" id="login-modal-close" class="rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div>
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+                        <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-5">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">Login with API Key</h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Enter your API key to access admin features and personalized content.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <form id="login-form" class="mt-5 sm:mt-6">
+                    <div class="mb-4">
+                        <label for="modal-api-key" class="block text-sm font-medium text-gray-700 dark:text-gray-300">API Key</label>
+                        <div class="mt-1 relative">
+                            <input type="password" id="modal-api-key" name="api-key" required
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white px-3 py-2 pr-10"
+                                   placeholder="mapi_...">
+                            <button type="button" id="toggle-api-key-visibility" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500">
+                                <svg class="h-5 w-5 show-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <svg class="h-5 w-5 hide-icon hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="modal-remember-me" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600">
+                            <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Remember me (save credentials locally)</span>
+                        </label>
+                    </div>
+                    <div id="login-error" class="hidden mb-4 text-sm text-red-600 dark:text-red-400"></div>
+                    <div id="login-success" class="hidden mb-4 text-sm text-green-600 dark:text-green-400"></div>
+                    <div class="mt-5 sm:mt-6">
+                        <button type="submit" class="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm">
+                            Login
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Configuration Check & Offline Detection -->
     <script>
-        // Anonymous read-only access is enabled by default
-        // Users can navigate to /setup manually if they want to configure an API key
-        // No automatic redirect to setup page
+        // Default API URL - auto-populated from server config or sensible default
+        const DEFAULT_API_URL = 'http://manuals.local:8080';
+
+        // Modal management
+        const modals = {
+            apiServer: {
+                modal: null,
+                form: null,
+                urlInput: null,
+                errorDiv: null,
+                successDiv: null,
+                skipBtn: null,
+                backdrop: null
+            },
+            login: {
+                modal: null,
+                form: null,
+                keyInput: null,
+                errorDiv: null,
+                successDiv: null,
+                closeBtn: null,
+                backdrop: null,
+                toggleBtn: null
+            }
+        };
+
+        // Initialize modals
+        function initModals() {
+            // API Server Modal
+            modals.apiServer.modal = document.getElementById('api-server-modal');
+            modals.apiServer.form = document.getElementById('api-server-form');
+            modals.apiServer.urlInput = document.getElementById('modal-api-url');
+            modals.apiServer.errorDiv = document.getElementById('api-server-error');
+            modals.apiServer.successDiv = document.getElementById('api-server-success');
+            modals.apiServer.skipBtn = document.getElementById('api-modal-skip');
+            modals.apiServer.backdrop = document.getElementById('api-modal-backdrop');
+
+            // Login Modal
+            modals.login.modal = document.getElementById('login-modal');
+            modals.login.form = document.getElementById('login-form');
+            modals.login.keyInput = document.getElementById('modal-api-key');
+            modals.login.errorDiv = document.getElementById('login-error');
+            modals.login.successDiv = document.getElementById('login-success');
+            modals.login.closeBtn = document.getElementById('login-modal-close');
+            modals.login.backdrop = document.getElementById('login-modal-backdrop');
+            modals.login.toggleBtn = document.getElementById('toggle-api-key-visibility');
+        }
+
+        function showApiServerModal() {
+            if (!modals.apiServer.modal) return;
+            // Pre-fill with saved URL or default
+            const savedUrl = sessionStorage.getItem('manuals_api_url') || localStorage.getItem('manuals_api_url') || DEFAULT_API_URL;
+            modals.apiServer.urlInput.value = savedUrl;
+            modals.apiServer.errorDiv.classList.add('hidden');
+            modals.apiServer.successDiv.classList.add('hidden');
+            modals.apiServer.modal.classList.remove('hidden');
+        }
+
+        function hideApiServerModal() {
+            if (!modals.apiServer.modal) return;
+            modals.apiServer.modal.classList.add('hidden');
+        }
+
+        function showLoginModal() {
+            if (!modals.login.modal) return;
+            modals.login.keyInput.value = '';
+            modals.login.errorDiv.classList.add('hidden');
+            modals.login.successDiv.classList.add('hidden');
+            modals.login.modal.classList.remove('hidden');
+        }
+
+        function hideLoginModal() {
+            if (!modals.login.modal) return;
+            modals.login.modal.classList.add('hidden');
+        }
+
+        async function testApiConnection(apiUrl) {
+            try {
+                const response = await fetch(`${apiUrl}/api/2025.12/status`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return { success: true, data: await response.json() };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testApiKey(apiUrl, apiKey) {
+            try {
+                const response = await fetch(`${apiUrl}/api/2025.12/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-API-Key': apiKey
+                    }
+                });
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Invalid API key');
+                    }
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return { success: true, data: await response.json() };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Check if this is first visit and show API server modal
+        function checkFirstVisit() {
+            const configured = sessionStorage.getItem('manuals_configured') || localStorage.getItem('manuals_configured');
+            if (!configured) {
+                // Show API server modal on first visit
+                showApiServerModal();
+            }
+        }
 
         // Offline/Online detection
         function updateOnlineStatus() {
@@ -263,7 +488,135 @@
         });
 
         // Check on page load
-        window.addEventListener('DOMContentLoaded', updateOnlineStatus);
+        window.addEventListener('DOMContentLoaded', () => {
+            updateOnlineStatus();
+            initModals();
+            setupModalHandlers();
+            checkFirstVisit();
+        });
+
+        // Setup modal event handlers
+        function setupModalHandlers() {
+            // API Server Modal handlers
+            if (modals.apiServer.form) {
+                modals.apiServer.form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const apiUrl = modals.apiServer.urlInput.value.trim();
+                    const submitBtn = modals.apiServer.form.querySelector('button[type="submit"]');
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Connecting...';
+                    modals.apiServer.errorDiv.classList.add('hidden');
+
+                    const result = await testApiConnection(apiUrl);
+
+                    if (result.success) {
+                        sessionStorage.setItem('manuals_api_url', apiUrl);
+                        sessionStorage.setItem('manuals_configured', 'true');
+                        sessionStorage.setItem('manuals_anonymous_mode', 'true');
+                        modals.apiServer.successDiv.textContent = 'Connected successfully!';
+                        modals.apiServer.successDiv.classList.remove('hidden');
+                        if (typeof notifications !== 'undefined') {
+                            notifications.success('API server configured');
+                        }
+                        setTimeout(() => {
+                            hideApiServerModal();
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        modals.apiServer.errorDiv.textContent = 'Connection failed: ' + result.error;
+                        modals.apiServer.errorDiv.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Connect';
+                    }
+                });
+
+                // Skip button - use default
+                modals.apiServer.skipBtn.addEventListener('click', async () => {
+                    const apiUrl = modals.apiServer.urlInput.value.trim() || DEFAULT_API_URL;
+                    sessionStorage.setItem('manuals_api_url', apiUrl);
+                    sessionStorage.setItem('manuals_configured', 'true');
+                    sessionStorage.setItem('manuals_anonymous_mode', 'true');
+                    hideApiServerModal();
+                    if (typeof notifications !== 'undefined') {
+                        notifications.info('Using default API server');
+                    }
+                });
+            }
+
+            // Login Modal handlers
+            if (modals.login.form) {
+                modals.login.form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const apiKey = modals.login.keyInput.value.trim();
+                    const apiUrl = sessionStorage.getItem('manuals_api_url') || DEFAULT_API_URL;
+                    const rememberMe = document.getElementById('modal-remember-me').checked;
+                    const submitBtn = modals.login.form.querySelector('button[type="submit"]');
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Logging in...';
+                    modals.login.errorDiv.classList.add('hidden');
+
+                    const result = await testApiKey(apiUrl, apiKey);
+
+                    if (result.success) {
+                        sessionStorage.setItem('manuals_api_key', apiKey);
+                        sessionStorage.removeItem('manuals_anonymous_mode');
+
+                        if (rememberMe && typeof window.handleRememberMe === 'function') {
+                            window.handleRememberMe(apiUrl, apiKey, true);
+                        }
+
+                        modals.login.successDiv.textContent = 'Login successful!';
+                        modals.login.successDiv.classList.remove('hidden');
+                        if (typeof notifications !== 'undefined') {
+                            notifications.success('Logged in as ' + result.data.user.name);
+                        }
+                        setTimeout(() => {
+                            hideLoginModal();
+                            window.location.reload();
+                        }, 500);
+                    } else {
+                        modals.login.errorDiv.textContent = 'Login failed: ' + result.error;
+                        modals.login.errorDiv.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Login';
+                    }
+                });
+
+                // Close button
+                modals.login.closeBtn.addEventListener('click', hideLoginModal);
+                modals.login.backdrop.addEventListener('click', hideLoginModal);
+
+                // Toggle password visibility
+                modals.login.toggleBtn.addEventListener('click', () => {
+                    const input = modals.login.keyInput;
+                    const showIcon = modals.login.toggleBtn.querySelector('.show-icon');
+                    const hideIcon = modals.login.toggleBtn.querySelector('.hide-icon');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        showIcon.classList.add('hidden');
+                        hideIcon.classList.remove('hidden');
+                    } else {
+                        input.type = 'password';
+                        showIcon.classList.remove('hidden');
+                        hideIcon.classList.add('hidden');
+                    }
+                });
+            }
+
+            // Login button in nav
+            const loginBtn = document.getElementById('login-btn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', showLoginModal);
+            }
+
+            // Mobile login button
+            const mobileLoginBtn = document.getElementById('mobile-login-btn');
+            if (mobileLoginBtn) {
+                mobileLoginBtn.addEventListener('click', showLoginModal);
+            }
+        }
 
         // Global loading bar for HTMX requests
         const loadingBar = document.getElementById('loading-bar');
@@ -332,8 +685,15 @@
                     </svg>
                     <span class="theme-label">Auto</span>
                 </button>
-                <!-- Logout button -->
-                <button id="logout-btn" type="button" class="flex items-center space-x-1 rounded-md px-3 py-2 text-sm text-indigo-200 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" title="Logout">
+                <!-- Login button (shown when not authenticated) -->
+                <button id="login-btn" type="button" class="flex items-center space-x-1 rounded-md px-3 py-2 text-sm text-indigo-200 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" title="Login with API key">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
+                    <span>Login</span>
+                </button>
+                <!-- Logout button (shown when authenticated) -->
+                <button id="logout-btn" type="button" class="hidden flex items-center space-x-1 rounded-md px-3 py-2 text-sm text-indigo-200 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" title="Logout">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                     </svg>
@@ -374,7 +734,10 @@
             <button id="mobile-theme-toggle" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium w-full text-left">
                 <span id="mobile-theme-text">Toggle Dark Mode</span>
             </button>
-            <button id="mobile-logout-btn" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium w-full text-left">
+            <button id="mobile-login-btn" class="text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium w-full text-left">
+                Login
+            </button>
+            <button id="mobile-logout-btn" class="hidden text-white hover:bg-indigo-500 block rounded-md px-3 py-2 text-base font-medium w-full text-left">
                 Logout
             </button>
         </div>
@@ -530,8 +893,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch and display current user from API using stored credentials
     async function fetchCurrentUser() {
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const mobileLoginBtn = document.getElementById('mobile-login-btn');
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+
+        function showLoginButtons() {
+            if (loginBtn) loginBtn.classList.remove('hidden');
+            if (logoutBtn) logoutBtn.classList.add('hidden');
+            if (mobileLoginBtn) mobileLoginBtn.classList.remove('hidden');
+            if (mobileLogoutBtn) mobileLogoutBtn.classList.add('hidden');
+        }
+
+        function showLogoutButtons() {
+            if (loginBtn) loginBtn.classList.add('hidden');
+            if (logoutBtn) logoutBtn.classList.remove('hidden');
+            if (mobileLoginBtn) mobileLoginBtn.classList.add('hidden');
+            if (mobileLogoutBtn) mobileLogoutBtn.classList.remove('hidden');
+        }
+
         // Check for anonymous mode first
         if (setupAnonymousMode()) {
+            // Show login button for anonymous users
+            showLoginButtons();
             return; // Skip API call for anonymous users
         }
 
@@ -549,6 +933,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!apiUrl || !apiKey) {
+            // No credentials - show login button
+            showLoginButtons();
             return;
         }
 
@@ -561,6 +947,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!response.ok) {
                 console.warn('Failed to fetch current user:', response.status);
+                // Show login button on auth failure
+                showLoginButtons();
                 return;
             }
 
@@ -568,6 +956,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = data.user;
 
             if (user) {
+                // User is authenticated - show logout, hide login
+                showLogoutButtons();
+
                 // Update desktop display
                 const userDisplay = document.getElementById('current-user-display');
                 const userName = document.getElementById('current-user-name');
@@ -576,9 +967,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (userDisplay && userName && userRole) {
                     userName.textContent = user.name;
-                    userRole.textContent = user.role;
+                    // Display capabilities-based role
+                    const caps = user.capabilities || [];
+                    let roleText = 'readonly';
+                    if (caps.includes('*')) {
+                        roleText = 'admin';
+                    } else if (caps.some(c => c.startsWith('admin:'))) {
+                        roleText = 'admin';
+                    } else if (caps.some(c => c.startsWith('write:'))) {
+                        roleText = 'contributor';
+                    }
+                    userRole.textContent = roleText;
                     // Style the role badge based on admin status
-                    if (user.role === 'admin') {
+                    if (roleText === 'admin') {
                         userRole.className = 'px-1.5 py-0.5 text-xs rounded bg-indigo-500 text-white';
                     } else {
                         userRole.className = 'px-1.5 py-0.5 text-xs rounded bg-indigo-400 text-indigo-100';
@@ -596,8 +997,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (mobileUserDisplay && mobileUserName && mobileUserRole) {
                     mobileUserName.textContent = user.name;
-                    mobileUserRole.textContent = user.role;
-                    if (user.role === 'admin') {
+                    const caps = user.capabilities || [];
+                    let roleText = 'readonly';
+                    if (caps.includes('*')) {
+                        roleText = 'admin';
+                    } else if (caps.some(c => c.startsWith('admin:'))) {
+                        roleText = 'admin';
+                    } else if (caps.some(c => c.startsWith('write:'))) {
+                        roleText = 'contributor';
+                    }
+                    mobileUserRole.textContent = roleText;
+                    if (roleText === 'admin') {
                         mobileUserRole.className = 'px-1.5 py-0.5 text-xs rounded bg-indigo-500 text-white';
                     } else {
                         mobileUserRole.className = 'px-1.5 py-0.5 text-xs rounded bg-indigo-400 text-indigo-100';
@@ -605,14 +1015,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     mobileUserDisplay.classList.remove('hidden');
                 }
 
-                // Show Admin link for authenticated users
+                // Show Admin link for admin users only
                 const adminLink = document.getElementById('admin-link');
                 const mobileAdminLink = document.getElementById('mobile-admin-link');
-                if (adminLink) adminLink.classList.remove('hidden');
-                if (mobileAdminLink) mobileAdminLink.classList.remove('hidden');
+                const caps = user.capabilities || [];
+                const isAdmin = caps.includes('*') || caps.some(c => c.startsWith('admin:'));
+                if (adminLink) {
+                    if (isAdmin) {
+                        adminLink.classList.remove('hidden');
+                    }
+                }
+                if (mobileAdminLink) {
+                    if (isAdmin) {
+                        mobileAdminLink.classList.remove('hidden');
+                    }
+                }
             }
         } catch (err) {
             console.warn('Error fetching current user:', err);
+            // Show login button on error
+            showLoginButtons();
         }
     }
 

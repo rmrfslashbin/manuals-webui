@@ -43,6 +43,31 @@ func New(cfg Config) *Server {
 		"formatBytes":    formatBytes,
 		"truncate":       truncate,
 		"add":            func(a, b int) int { return a + b },
+		"multiply":       func(a, b interface{}) float64 {
+			// Handle different numeric types for template multiplication
+			var af, bf float64
+			switch v := a.(type) {
+			case float32:
+				af = float64(v)
+			case float64:
+				af = v
+			case int:
+				af = float64(v)
+			default:
+				af = 0
+			}
+			switch v := b.(type) {
+			case float32:
+				bf = float64(v)
+			case float64:
+				bf = v
+			case int:
+				bf = float64(v)
+			default:
+				bf = 0
+			}
+			return af * bf
+		},
 		"markdown":       mdRenderer.RenderMarkdown,
 		"markdownInline": mdRenderer.RenderMarkdownInline,
 	}

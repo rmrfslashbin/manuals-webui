@@ -517,12 +517,12 @@ func (c *Client) delete(path string) error {
 
 // User represents an API user.
 type User struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Role       string `json:"role"`
-	CreatedAt  string `json:"created_at"`
-	LastSeenAt string `json:"last_seen_at,omitempty"`
-	IsActive   bool   `json:"is_active"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	Capabilities []string `json:"capabilities"`
+	CreatedAt    string   `json:"created_at"`
+	LastSeenAt   string   `json:"last_seen_at,omitempty"`
+	IsActive     bool     `json:"is_active"`
 }
 
 // UsersResponse is the response from the users list endpoint.
@@ -532,8 +532,9 @@ type UsersResponse struct {
 
 // CreateUserRequest is the request body for creating a user.
 type CreateUserRequest struct {
-	Name string `json:"name"`
-	Role string `json:"role"`
+	Name         string   `json:"name"`
+	Capabilities []string `json:"capabilities,omitempty"`
+	Preset       string   `json:"preset,omitempty"`
 }
 
 // CreateUserResponse is the response from creating a user.
@@ -606,10 +607,11 @@ func (c *Client) ListUsers() (*UsersResponse, error) {
 	return &resp, nil
 }
 
-// CreateUser creates a new user (admin only).
-func (c *Client) CreateUser(name, role string) (*CreateUserResponse, error) {
+// CreateUser creates a new user with a preset (admin only).
+// Valid presets: "readonly", "contributor", "operator", "admin"
+func (c *Client) CreateUser(name, preset string) (*CreateUserResponse, error) {
 	var resp CreateUserResponse
-	if err := c.post("/admin/users", CreateUserRequest{Name: name, Role: role}, &resp); err != nil {
+	if err := c.post("/admin/users", CreateUserRequest{Name: name, Preset: preset}, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
@@ -620,9 +622,10 @@ func (c *Client) DeleteUser(id string) error {
 	return c.delete("/admin/users/" + id)
 }
 
-// UpdateUserRole updates a user's role (admin only).
-func (c *Client) UpdateUserRole(id, role string) error {
-	return c.put("/admin/users/"+id+"/role", map[string]string{"role": role})
+// UpdateUserCapabilities updates a user's capabilities using a preset (admin only).
+// Valid presets: "readonly", "contributor", "operator", "admin"
+func (c *Client) UpdateUserCapabilities(id, preset string) error {
+	return c.put("/admin/users/"+id+"/capabilities", map[string]string{"preset": preset})
 }
 
 // RotateAPIKey rotates a user's API key (admin only).
