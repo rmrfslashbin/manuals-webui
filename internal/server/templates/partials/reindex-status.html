@@ -1,0 +1,59 @@
+{{define "partials/reindex-status.html"}}
+<div class="overflow-hidden bg-white shadow sm:rounded-lg" {{if .Running}}hx-get="/admin/reindex/status" hx-trigger="every 2s" hx-swap="outerHTML"{{end}}>
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-base font-semibold leading-6 text-gray-900">Reindex Status</h3>
+    </div>
+    <div class="border-t border-gray-200">
+        <dl>
+            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                    {{if .Running}}
+                    <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-800">
+                        <svg class="-ml-0.5 mr-1.5 h-3 w-3 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Running
+                    </span>
+                    {{else}}
+                    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Idle</span>
+                    {{end}}
+                </dd>
+            </div>
+            {{if .LastRun}}
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Last Run</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{{.LastRun}}</dd>
+            </div>
+            {{end}}
+            {{if .LastStatus}}
+            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Last Status</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                    {{if eq .LastStatus "success"}}
+                    <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Success</span>
+                    {{else if eq .LastStatus "failed"}}
+                    <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">Failed</span>
+                    {{else}}
+                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">{{.LastStatus}}</span>
+                    {{end}}
+                </dd>
+            </div>
+            {{end}}
+            {{if .DevicesFound}}
+            <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Devices Found</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{{.DevicesFound}}</dd>
+            </div>
+            {{end}}
+            {{if .DocsFound}}
+            <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Documents Found</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{{.DocsFound}}</dd>
+            </div>
+            {{end}}
+        </dl>
+    </div>
+</div>
+{{end}}

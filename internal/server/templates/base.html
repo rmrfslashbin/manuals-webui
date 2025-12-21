@@ -5,6 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}} - Manuals</title>
+    <!-- Prevent dark mode flash: apply theme before any rendering -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('manuals_theme') || 'auto';
+                var isDark = theme === 'dark' ||
+                    (theme === 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="stylesheet" href="/static/output.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>

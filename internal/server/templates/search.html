@@ -3,8 +3,8 @@
 {{define "content"}}
 <div class="space-y-6">
     <div>
-        <h1 class="text-2xl font-bold text-gray-900">Search</h1>
-        <p class="mt-1 text-sm text-gray-500">Search across all documentation</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Search</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Search across all documentation</p>
     </div>
 
     <!-- Search Form -->
@@ -32,7 +32,7 @@
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Search mode:</span>
                 <div class="flex rounded-md shadow-sm" role="group">
                     <label class="relative flex cursor-pointer">
-                        <input type="radio" name="mode" value="keyword" {{if or (eq .Content.Mode "keyword") (eq .Content.Mode "")}}checked{{end}}
+                        <input type="radio" name="mode" value="semantic" {{if or (eq .Content.Mode "semantic") (eq .Content.Mode "")}}checked{{end}}
                                class="peer sr-only"
                                hx-get="/partials/search-results"
                                hx-trigger="change"
@@ -41,11 +41,11 @@
                         <span class="px-4 py-2 text-sm font-medium rounded-l-md border border-gray-300 dark:border-gray-600
                                      peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
                                      bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
-                            Keyword
+                            Semantic (AI)
                         </span>
                     </label>
                     <label class="relative flex cursor-pointer">
-                        <input type="radio" name="mode" value="semantic" {{if eq .Content.Mode "semantic"}}checked{{end}}
+                        <input type="radio" name="mode" value="keyword" {{if eq .Content.Mode "keyword"}}checked{{end}}
                                class="peer sr-only"
                                hx-get="/partials/search-results"
                                hx-trigger="change"
@@ -54,12 +54,12 @@
                         <span class="px-4 py-2 text-sm font-medium rounded-r-md border border-l-0 border-gray-300 dark:border-gray-600
                                      peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600
                                      bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600">
-                            Semantic (AI)
+                            Keyword
                         </span>
                     </label>
                 </div>
                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                    {{if eq .Content.Mode "semantic"}}Finds results by meaning{{else}}Finds exact keyword matches{{end}}
+                    {{if eq .Content.Mode "keyword"}}Finds exact keyword matches{{else}}Finds results by meaning{{end}}
                 </span>
             </div>
             {{if .Content.SemanticError}}
@@ -74,7 +74,7 @@
 
     <!-- Search History -->
     {{if not .Content.Query}}
-    <div class="bg-white shadow sm:rounded-lg p-6">
+    <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-6">
         <div id="search-history">
             <!-- Search history will be populated by JavaScript -->
         </div>
@@ -85,8 +85,8 @@
     <div id="search-results">
         {{if .Content.Query}}
         {{if .Content.Results}}
-        <div class="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul role="list" class="divide-y divide-gray-200">
+        <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+            <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
                 {{range .Content.Results}}
                 <li>
                     <a href="/devices/{{.DeviceID}}" class="block hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -119,21 +119,21 @@
             </ul>
         </div>
         {{else}}
-        <div class="text-center py-12 bg-white rounded-lg shadow">
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900">No results found</h3>
-            <p class="mt-1 text-sm text-gray-500">Try adjusting your search terms</p>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">No results found</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your search terms</p>
         </div>
         {{end}}
         {{else}}
-        <div class="text-center py-12 bg-white rounded-lg shadow">
+        <div class="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <h3 class="mt-2 text-sm font-semibold text-gray-900">Start searching</h3>
-            <p class="mt-1 text-sm text-gray-500">Enter a search term to find devices and documentation</p>
+            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Start searching</h3>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enter a search term to find devices and documentation</p>
         </div>
         {{end}}
     </div>

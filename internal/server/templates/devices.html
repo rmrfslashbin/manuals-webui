@@ -4,22 +4,22 @@
 <div class="space-y-6">
     <div class="sm:flex sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Devices</h1>
-            <p class="mt-1 text-sm text-gray-500">Browse all hardware, software, and protocol documentation</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Devices</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Browse all hardware, software, and protocol documentation</p>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white shadow sm:rounded-lg p-4">
+    <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-4">
         <form class="flex flex-wrap gap-4 items-end">
             <div>
-                <label for="domain" class="block text-sm font-medium text-gray-700">Domain</label>
+                <label for="domain" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Domain</label>
                 <select id="domain" name="domain"
                         hx-get="/devices"
                         hx-trigger="change"
                         hx-push-url="true"
                         hx-target="body"
-                        class="mt-1 block rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
+                        class="mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm">
                     <option value="">All Domains</option>
                     <option value="hardware" {{if eq .Content.Domain "hardware"}}selected{{end}}>Hardware</option>
                     <option value="software" {{if eq .Content.Domain "software"}}selected{{end}}>Software</option>
@@ -27,42 +27,42 @@
                 </select>
             </div>
             <div>
-                <label for="type" class="block text-sm font-medium text-gray-700">Type</label>
+                <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
                 <input type="text" id="type" name="type" value="{{.Content.Type}}"
                        placeholder="e.g., sensors, esp32"
-                       class="mt-1 block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2">
+                       class="mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2">
             </div>
             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
                 Filter
             </button>
             {{if or .Content.Domain .Content.Type}}
-            <a href="/devices" class="text-sm text-gray-500 hover:text-gray-700">Clear filters</a>
+            <a href="/devices" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Clear filters</a>
             {{end}}
         </form>
     </div>
 
     <!-- Device List -->
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul role="list" class="divide-y divide-gray-200">
+    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+        <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
             {{range .Content.Devices}}
             <li>
-                <a href="/devices/{{.ID}}" class="block hover:bg-gray-50">
+                <a href="/devices/{{.ID}}" class="block hover:bg-gray-50 dark:hover:bg-gray-700">
                     <div class="px-4 py-4 sm:px-6">
                         <div class="flex items-center justify-between">
-                            <p class="truncate text-sm font-medium text-indigo-600">{{.Name}}</p>
+                            <p class="truncate text-sm font-medium text-indigo-600 dark:text-indigo-400">{{.Name}}</p>
                             <div class="ml-2 flex flex-shrink-0">
-                                <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                <span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20">
                                     {{.Domain}}
                                 </span>
                             </div>
                         </div>
                         <div class="mt-2 sm:flex sm:justify-between">
                             <div class="sm:flex">
-                                <p class="flex items-center text-sm text-gray-500">
+                                <p class="flex items-center text-sm text-gray-500 dark:text-gray-400">
                                     {{.Type}}
                                 </p>
                             </div>
-                            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
                                 <p>{{.Path}}</p>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                 </a>
             </li>
             {{else}}
-            <li class="px-4 py-8 text-center text-gray-500">
+            <li class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
                 No devices found
             </li>
             {{end}}
@@ -79,9 +79,9 @@
 
     <!-- Pagination -->
     {{if gt .Content.Total 20}}
-    <nav class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg shadow">
+    <nav class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 sm:px-6 rounded-lg shadow">
         <div class="hidden sm:block">
-            <p class="text-sm text-gray-700">
+            <p class="text-sm text-gray-700 dark:text-gray-300">
                 Showing page <span class="font-medium">{{.Content.Page}}</span> of
                 <span class="font-medium">{{.Content.Total}}</span> devices
             </p>
@@ -89,12 +89,12 @@
         <div class="flex flex-1 justify-between sm:justify-end gap-2">
             {{if gt .Content.Page 1}}
             <a href="/devices?page={{printf "%d" (add .Content.Page -1)}}{{if .Content.Domain}}&domain={{.Content.Domain}}{{end}}{{if .Content.Type}}&type={{.Content.Type}}{{end}}"
-               class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+               class="relative inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
                 Previous
             </a>
             {{end}}
             <a href="/devices?page={{printf "%d" (add .Content.Page 1)}}{{if .Content.Domain}}&domain={{.Content.Domain}}{{end}}{{if .Content.Type}}&type={{.Content.Type}}{{end}}"
-               class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+               class="relative inline-flex items-center rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
                 Next
             </a>
         </div>

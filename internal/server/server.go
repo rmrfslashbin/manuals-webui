@@ -72,8 +72,8 @@ func New(cfg Config) *Server {
 		"markdownInline": mdRenderer.RenderMarkdownInline,
 	}
 
-	// Parse base template only
-	baseTemplate := template.Must(template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/base.html"))
+	// Parse base template and all partials
+	baseTemplate := template.Must(template.New("").Funcs(funcMap).ParseFS(templatesFS, "templates/base.html", "templates/partials/*.html"))
 
 	return &Server{
 		client:       cfg.Client,

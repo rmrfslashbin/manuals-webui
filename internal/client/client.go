@@ -139,7 +139,7 @@ type StatusResponse struct {
 	Status      string `json:"status"`
 	APIVersion  string `json:"api_version"`
 	Version     string `json:"version"`
-	DBPath      string `json:"db_path"`
+	DocsPath    string `json:"docs_path"`
 	LastReindex string `json:"last_reindex,omitempty"`
 	Counts      struct {
 		Devices   int `json:"devices"`
@@ -653,15 +653,15 @@ func (c *Client) UpdateSetting(key, value string) error {
 	return c.put("/admin/settings/"+key, map[string]string{"value": value})
 }
 
-// TriggerReindex triggers a reindex operation (admin only).
+// TriggerReindex triggers a reindex operation (requires write:reindex capability).
 func (c *Client) TriggerReindex() error {
-	return c.post("/admin/reindex", nil, nil)
+	return c.post("/rw/reindex", nil, nil)
 }
 
-// GetReindexStatus gets the reindex status (admin only).
+// GetReindexStatus gets the reindex status (requires write:reindex capability).
 func (c *Client) GetReindexStatus() (*ReindexStatus, error) {
 	var resp ReindexStatus
-	if err := c.get("/admin/reindex/status", &resp); err != nil {
+	if err := c.get("/rw/reindex/status", &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil

@@ -123,7 +123,7 @@ class SearchHistoryManager {
 
         if (history.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -135,10 +135,10 @@ class SearchHistoryManager {
 
         let html = `
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-900">Recent Searches</h3>
+                <h3 class="text-sm font-medium text-gray-900 dark:text-white">Recent Searches</h3>
                 <button
                     onclick="window.searchHistory.clearHistory()"
-                    class="text-xs text-gray-500 hover:text-gray-700"
+                    class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                     Clear all
                 </button>
@@ -151,20 +151,20 @@ class SearchHistoryManager {
             const encodedQuery = encodeURIComponent(item.query);
 
             html += `
-                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded group">
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded group">
                     <a
                         href="/search?q=${encodedQuery}"
-                        class="flex-1 flex items-center space-x-2 text-sm text-gray-700 hover:text-indigo-600"
+                        class="flex-1 flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
                     >
                         <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         <span class="flex-1">${this.escapeHtml(item.query)}</span>
-                        <span class="text-xs text-gray-400">${timeAgo}</span>
+                        <span class="text-xs text-gray-400 dark:text-gray-500">${timeAgo}</span>
                     </a>
                     <button
                         onclick="window.searchHistory.removeSearch('${this.escapeHtml(item.query).replace(/'/g, "\\'")}')"
-                        class="ml-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600"
+                        class="ml-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 dark:hover:text-red-400"
                         title="Remove from history"
                     >
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

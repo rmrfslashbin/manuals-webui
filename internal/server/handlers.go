@@ -167,7 +167,7 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	mode := r.URL.Query().Get("mode")
 	if mode == "" {
-		mode = "keyword" // Default to keyword search
+		mode = "semantic" // Default to semantic search
 	}
 
 	var results []UnifiedSearchResult
@@ -299,7 +299,7 @@ func (s *Server) handleSearchResultsPartial(w http.ResponseWriter, r *http.Reque
 	query := r.URL.Query().Get("q")
 	mode := r.URL.Query().Get("mode")
 	if mode == "" {
-		mode = "keyword"
+		mode = "semantic"
 	}
 
 	if query == "" {
@@ -605,7 +605,7 @@ func (s *Server) handleAdminTriggerReindex(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	s.renderPartial(w, "reindex-status-content", status)
+	s.renderPartial(w, "partials/reindex-status.html", status)
 }
 
 func (s *Server) handleAdminReindexStatus(w http.ResponseWriter, r *http.Request) {
@@ -615,7 +615,7 @@ func (s *Server) handleAdminReindexStatus(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	s.renderPartial(w, "reindex-status-content", status)
+	s.renderPartial(w, "partials/reindex-status.html", status)
 }
 
 // handleHealth proxies health check requests to the API server
