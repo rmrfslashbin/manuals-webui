@@ -118,6 +118,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   Combobox,
   ComboboxInput,
@@ -127,6 +128,7 @@ import {
 } from '@headlessui/vue'
 import { MagnifyingGlassIcon, CheckIcon, SparklesIcon } from '@heroicons/vue/24/outline'
 
+const router = useRouter()
 const query = ref('')
 const selectedItem = ref(null)
 
@@ -151,9 +153,8 @@ const filteredSuggestions = computed(() => {
 
 const handleSearch = () => {
   if (query.value || selectedItem.value) {
-    console.log('Searching for:', query.value || selectedItem.value.name)
-    // Navigate to search results
-    window.location.href = `/search?q=${encodeURIComponent(query.value || selectedItem.value.name)}`
+    const searchQuery = query.value || selectedItem.value.name
+    router.push({ path: '/search', query: { q: searchQuery, mode: 'semantic' } })
   }
 }
 </script>

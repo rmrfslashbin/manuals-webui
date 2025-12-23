@@ -11,7 +11,7 @@
         Manuals
       </h1>
       <p class="text-sm text-gray-400">
-        Your Documentation Platform, Reimagined
+        The docs, when you need to RTFM
       </p>
     </div>
 

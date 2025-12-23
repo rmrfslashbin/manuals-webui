@@ -1,154 +1,104 @@
 import { ref, computed } from 'vue'
-import { UserManager, WebStorageStateStore } from 'oidc-client-ts'
 
-// OIDC configuration from environment variables
-// In production, these would come from import.meta.env or similar
-const oidcConfig = {
-  authority: import.meta.env.VITE_OIDC_AUTHORITY || '',
-  client_id: import.meta.env.VITE_OIDC_CLIENT_ID || '',
-  redirect_uri: `${window.location.origin}/callback`,
-  post_logout_redirect_uri: window.location.origin,
-  response_type: 'code',
-  scope: 'openid profile email',
-  automaticSilentRenew: true,
-  userStore: new WebStorageStateStore({ store: window.localStorage })
-}
-
-// Create UserManager instance (only if OIDC is configured)
-let userManager = null
-if (oidcConfig.authority && oidcConfig.client_id) {
-  userManager = new UserManager(oidcConfig)
-}
+// API version
+const API_VERSION = '2025.12'
 
 // Reactive state
 const user = ref(null)
-const isAuthenticated = computed(() => !!user.value && !user.value.expired)
-const accessToken = computed(() => user.value?.access_token || null)
+const loading = ref(false)
+const error = ref(null)
+
+// Computed properties
+const isAuthenticated = computed(() => !!user.value)
+const profile = computed(() => user.value || null)
 
 /**
- * OIDC Authentication Composable
- * Provides authentication state and methods for the Vue app
+ * BFF Authentication Composable
+ *
+ * Uses Backend-for-Frontend pattern where the API server manages OIDC flow.
+ * Authentication is handled via HTTP-only cookies set by the server.
  */
 export function useAuth() {
   /**
-   * Initialize auth state by checking for existing user session
+   * Initialize auth state by checking current session with the API
    */
   async function init() {
-    if (!userManager) {
-      console.warn('OIDC not configured - authentication disabled')
-      return
-    }
+    loading.value = true
+    error.value = null
 
     try {
-      const storedUser = await userManager.getUser()
-      if (storedUser && !storedUser.expired) {
-        user.value = storedUser
+      const response = await fetch(`/api/${API_VERSION}/auth/me`, {
+        credentials: 'include', // Send cookies
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.authenticated) {
+          user.value = data.user
+        } else {
+          user.value = null
+        }
+      } else {
+        user.value = null
       }
-    } catch (error) {
-      console.error('Failed to initialize auth:', error)
-    }
-
-    // Set up event listeners
-    userManager.events.addUserLoaded((loadedUser) => {
-      user.value = loadedUser
-    })
-
-    userManager.events.addUserUnloaded(() => {
+    } catch (err) {
+      console.error('Failed to check auth status:', err)
+      error.value = err.message
       user.value = null
-    })
-
-    userManager.events.addAccessTokenExpired(() => {
-      console.log('Access token expired')
-      user.value = null
-    })
-  }
-
-  /**
-   * Sign in - redirects to OIDC provider
-   */
-  async function signIn() {
-    if (!userManager) {
-      throw new Error('OIDC not configured')
-    }
-
-    try {
-      await userManager.signinRedirect()
-    } catch (error) {
-      console.error('Sign in error:', error)
-      throw error
+    } finally {
+      loading.value = false
     }
   }
 
   /**
-   * Handle callback after redirect from OIDC provider
-   * Call this on the callback page
+   * Sign in - redirects to BFF login endpoint which handles OIDC flow
+   * @param {string} returnUrl - URL to return to after login (defaults to current page)
    */
-  async function handleCallback() {
-    if (!userManager) {
-      throw new Error('OIDC not configured')
-    }
-
-    try {
-      const callbackUser = await userManager.signinRedirectCallback()
-      user.value = callbackUser
-      return callbackUser
-    } catch (error) {
-      console.error('Callback error:', error)
-      throw error
-    }
+  function signIn(returnUrl = window.location.href) {
+    const loginUrl = `/api/${API_VERSION}/auth/login?return_url=${encodeURIComponent(returnUrl)}`
+    window.location.href = loginUrl
   }
 
   /**
-   * Sign out - clears session and redirects to OIDC provider
+   * Sign out - redirects to BFF logout endpoint
+   * @param {boolean} fullLogout - Also logout from OIDC provider (default: false)
    */
-  async function signOut() {
-    if (!userManager) {
-      throw new Error('OIDC not configured')
-    }
-
-    try {
-      await userManager.signoutRedirect()
-    } catch (error) {
-      console.error('Sign out error:', error)
-      throw error
-    }
+  function signOut(fullLogout = false) {
+    const logoutUrl = `/api/${API_VERSION}/auth/logout${fullLogout ? '?full=true' : ''}`
+    window.location.href = logoutUrl
   }
 
   /**
-   * Silent token renewal
+   * Check for auth error in URL (set by callback handler on error)
    */
-  async function renewToken() {
-    if (!userManager) {
-      throw new Error('OIDC not configured')
-    }
-
-    try {
-      const renewedUser = await userManager.signinSilent()
-      user.value = renewedUser
-      return renewedUser
-    } catch (error) {
-      console.error('Token renewal error:', error)
-      throw error
+  function checkAuthError() {
+    const urlParams = new URLSearchParams(window.location.search)
+    const authError = urlParams.get('auth_error')
+    if (authError) {
+      error.value = authError
+      // Clean up URL
+      const url = new URL(window.location.href)
+      url.searchParams.delete('auth_error')
+      window.history.replaceState({}, '', url.toString())
     }
   }
-
-  /**
-   * Check if OIDC is configured
-   */
-  const isOIDCConfigured = computed(() => !!userManager)
 
   return {
     // State
     user,
+    loading,
+    error,
     isAuthenticated,
-    accessToken,
-    isOIDCConfigured,
+    profile,
 
     // Methods
     init,
     signIn,
     signOut,
-    handleCallback,
-    renewToken
+    checkAuthError,
+
+    // Legacy compatibility (access token not available in BFF pattern)
+    accessToken: computed(() => null),
+    isOIDCConfigured: computed(() => true), // BFF is always "configured" if endpoints exist
   }
 }

@@ -4,17 +4,13 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
+  root: '.',
   build: {
-    outDir: 'internal/server/static/dist',
+    outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'frontend/main.js')
-      },
-      output: {
-        entryFileNames: 'assets/[name].[hash].js',
-        chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]'
+        main: resolve(__dirname, 'index.html')
       }
     }
   },

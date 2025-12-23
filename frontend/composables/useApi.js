@@ -1,21 +1,19 @@
-import { ref, computed } from 'vue'
-import { useAuth } from './useAuth'
+import { ref } from 'vue'
 
-// API base URL from environment or default
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+// API version - requests go through nginx proxy at same origin
 const API_VERSION = '2025.12'
 
 /**
  * API Client Composable
- * Handles authenticated requests to the manuals-api backend
+ * Handles requests to the manuals-api backend.
+ * Authentication is handled via HTTP-only cookies (BFF pattern).
  */
 export function useApi() {
-  const { accessToken } = useAuth()
   const loading = ref(false)
   const error = ref(null)
 
   /**
-   * Make an authenticated API request
+   * Make an API request
    * @param {string} endpoint - API endpoint (e.g., '/devices')
    * @param {object} options - Fetch options
    * @returns {Promise<any>} Response data
@@ -31,16 +29,12 @@ export function useApi() {
         ...options.headers
       }
 
-      // Add authentication header (Bearer token if available)
-      if (accessToken.value) {
-        headers['Authorization'] = `Bearer ${accessToken.value}`
-      }
-
-      // Make request
-      const url = `${API_BASE_URL}/api/${API_VERSION}${endpoint}`
+      // Make request with credentials (cookies sent for BFF auth)
+      const url = `/api/${API_VERSION}${endpoint}`
       const response = await fetch(url, {
         ...options,
-        headers
+        headers,
+        credentials: 'include', // Always send cookies for session auth
       })
 
       // Handle errors
@@ -118,10 +112,10 @@ export function useApi() {
   }
 
   /**
-   * Get device by ID
+   * Get device by ID (includes full documentation content)
    */
   async function getDevice(id) {
-    return get(`/devices/${id}`)
+    return get(`/devices/${id}`, { content: 'true' })
   }
 
   /**

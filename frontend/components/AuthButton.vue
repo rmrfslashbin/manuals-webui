@@ -51,45 +51,37 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '../composables/useAuth'
 
-const { user, isAuthenticated, isOIDCConfigured, init, signIn, signOut } = useAuth()
+const { user, isAuthenticated, isOIDCConfigured, init, signIn, signOut, checkAuthError, error } = useAuth()
 const loading = ref(false)
 
 const userName = computed(() => {
   if (!user.value) return ''
-  return user.value.profile?.name || user.value.profile?.email || 'User'
+  // BFF returns user object directly from /auth/me
+  return user.value.name || user.value.email?.split('@')[0] || 'User'
 })
 
 const userEmail = computed(() => {
   if (!user.value) return ''
-  return user.value.profile?.email || ''
+  return user.value.email || ''
 })
 
-async function handleLogin() {
+function handleLogin() {
   loading.value = true
-  try {
-    await signIn()
-  } catch (error) {
-    console.error('Login failed:', error)
-    alert('Login failed. Please try again.')
-  } finally {
-    loading.value = false
-  }
+  // signIn redirects, so the page will navigate away
+  signIn()
 }
 
-async function handleLogout() {
+function handleLogout() {
   loading.value = true
-  try {
-    await signOut()
-  } catch (error) {
-    console.error('Logout failed:', error)
-    alert('Logout failed. Please try again.')
-  } finally {
-    loading.value = false
-  }
+  // signOut redirects, so the page will navigate away
+  signOut()
 }
 
 // Initialize auth on mount
 onMounted(async () => {
+  // Check for auth errors from callback
+  checkAuthError()
+  // Initialize auth state
   await init()
 })
 </script>

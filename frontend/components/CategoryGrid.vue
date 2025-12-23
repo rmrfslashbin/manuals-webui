@@ -6,10 +6,10 @@
 
     <!-- Bento Grid Layout -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-fr">
-      <a
+      <router-link
         v-for="(category, index) in categories"
         :key="category.id"
-        :href="`/devices?domain=${category.id}`"
+        :to="`/devices?domain=${category.id}`"
         :class="[
           'glass-card group relative overflow-hidden',
           category.large ? 'md:col-span-2 md:row-span-2' : ''
@@ -70,7 +70,7 @@
           <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
                       -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
         </div>
-      </a>
+      </router-link>
     </div>
 
     <!-- Additional CTA Section -->
@@ -81,7 +81,7 @@
       <p class="text-xs text-gray-400 mb-3">
         Browse all {{ totalCount }}+ devices and documents
       </p>
-      <a href="/devices"
+      <router-link to="/devices"
          class="inline-flex items-center space-x-1.5 px-4 py-2 rounded-lg
                 bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-500
                 text-white font-semibold text-xs
@@ -93,7 +93,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M17 8l4 4m0 0l-4 4m4-4H3"/>
         </svg>
-      </a>
+      </router-link>
     </div>
   </div>
 </template>
@@ -117,11 +117,12 @@ const totalCount = computed(() => 60) // This could be fetched from API
 }
 
 /* Ensure consistent card heights in grid */
-a.glass-card {
+.glass-card {
   min-height: 120px;
+  display: block;
 }
 
-a.glass-card.md\:col-span-2.md\:row-span-2 {
+.glass-card.md\:col-span-2.md\:row-span-2 {
   min-height: 200px;
 }
 </style>
