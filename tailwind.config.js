@@ -2,6 +2,8 @@
 module.exports = {
   content: [
     "./internal/server/templates/**/*.html",
+    "./index.html",
+    "./frontend/**/*.{vue,js}",
   ],
   darkMode: 'class',
   theme: {
