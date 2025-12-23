@@ -50,3 +50,4 @@ build/
 # Logs
 *.log
 logs/
+.playwright-mcp/
