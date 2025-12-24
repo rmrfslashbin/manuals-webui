@@ -24,10 +24,10 @@
                    rounded-lg backdrop-blur-sm
                    text-white
                    placeholder-gray-500
-                   focus:outline-none focus:border-sky-500
-                   focus:ring-2 focus:ring-sky-500/20
+                   focus:outline-none focus:border-cyan-500
+                   focus:ring-2 focus:ring-cyan-500/20
                    transition-all duration-300
-                   hover:border-sky-400"
+                   hover:border-cyan-400"
             placeholder="ESP32, BME280, I2C..."
             @change="query = $event.target.value"
             :display-value="(item) => item?.name || ''"
@@ -39,9 +39,9 @@
             @click="handleSearch"
             class="absolute right-1 top-1/2 -translate-y-1/2
                    px-3 py-1.5 rounded-md
-                   bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-500
+                   bg-gradient-to-r from-cyan-500 to-teal-600
                    text-white text-xs font-semibold
-                   hover:shadow-lg hover:scale-105
+                   hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105
                    active:scale-95
                    transition-all duration-300">
             Search
@@ -55,13 +55,16 @@
           leaveTo="opacity-0"
         >
           <ComboboxOptions
-            class="absolute z-10 mt-4 w-full
-                   glass-card p-2
+            class="absolute z-10 mt-2 w-full
+                   bg-gray-800 border-2 border-cyan-500/50
+                   rounded-lg shadow-xl shadow-cyan-500/20
+                   backdrop-blur-xl p-2
                    max-h-96 overflow-auto">
             <div v-if="filteredSuggestions.length === 0 && query !== ''"
-                 class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-              <SparklesIcon class="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No results found. Try a different search term!</p>
+                 class="px-4 py-8 text-center">
+              <SparklesIcon class="h-12 w-12 mx-auto mb-2 text-gray-500" />
+              <p class="text-sm font-medium text-gray-300 mb-1">No results found</p>
+              <p class="text-xs text-gray-500">Try searching for "ESP32", "Arduino", or "I2C"</p>
             </div>
 
             <ComboboxOption
@@ -72,21 +75,22 @@
               class="cursor-pointer">
               <div :class="[
                 'px-3 py-2 rounded-lg transition-all duration-200',
-                active ? 'bg-gradient-to-r from-sky-500/20 to-cyan-500/20 scale-105' : ''
+                active ? 'bg-gradient-to-r from-cyan-500/30 to-teal-500/30 border border-cyan-400/50' : 'border border-transparent',
+                selected ? 'bg-cyan-500/10' : ''
               ]">
                 <div class="flex items-center justify-between">
-                  <div class="flex items-center space-x-2">
-                    <span class="text-xl">{{ suggestion.icon }}</span>
+                  <div class="flex items-center space-x-3">
+                    <span class="text-2xl">{{ suggestion.icon }}</span>
                     <div>
-                      <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                      <p class="text-sm font-semibold text-white">
                         {{ suggestion.name }}
                       </p>
-                      <p class="text-xs text-gray-600 dark:text-gray-400">
+                      <p class="text-xs text-gray-400">
                         {{ suggestion.category }}
                       </p>
                     </div>
                   </div>
-                  <CheckIcon v-if="selected" class="h-4 w-4 text-sky-500" />
+                  <CheckIcon v-if="selected" class="h-5 w-5 text-cyan-400" />
                 </div>
               </div>
             </ComboboxOption>
@@ -106,7 +110,7 @@
                bg-gray-800/50
                border border-gray-700/30
                text-gray-300
-               hover:bg-gradient-to-r hover:from-sky-500 hover:to-cyan-500
+               hover:bg-gradient-to-r hover:from-cyan-500 hover:to-teal-500
                hover:text-white hover:border-transparent
                transition-all duration-200
                hover:scale-105 active:scale-95">

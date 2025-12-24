@@ -18,5 +18,22 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'frontend')
     }
+  },
+  // Development server configuration (not used in production builds)
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api.manuals.webby.local',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path
+      },
+      '/auth': {
+        target: 'https://api.manuals.webby.local',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path
+      }
+    }
   }
 })

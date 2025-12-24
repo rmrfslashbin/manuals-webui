@@ -11,64 +11,50 @@
         :key="category.id"
         :to="`/devices?domain=${category.id}`"
         :class="[
-          'glass-card group relative overflow-hidden',
+          'group relative overflow-hidden rounded-xl',
+          'backdrop-blur-xl bg-gray-800/40 border border-gray-700/40',
+          'hover:border-cyan-500/50 hover:bg-gray-800/60',
+          'transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10',
           category.large ? 'md:col-span-2 md:row-span-2' : ''
         ]"
         :style="{ animationDelay: `${index * 100}ms` }">
 
-        <!-- Gradient Background Overlay -->
+        <!-- Gradient Border on Hover -->
         <div :class="[
-          'absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-20',
-          'transition-opacity duration-500',
+          'absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10',
+          'transition-opacity duration-500 pointer-events-none',
           category.gradient
         ]"></div>
 
         <!-- Content -->
-        <div class="relative p-3 h-full flex flex-col justify-between">
-          <!-- Icon & Title -->
-          <div class="space-y-1">
-            <div class="text-3xl transform group-hover:scale-110 group-hover:rotate-12
-                        transition-all duration-500 inline-block">
+        <div class="relative p-4 h-full flex items-center justify-between">
+          <!-- Icon & Text -->
+          <div class="flex items-center space-x-3 flex-1">
+            <div class="text-4xl transform group-hover:scale-110 transition-transform duration-300">
               {{ category.icon }}
             </div>
-
-            <h3 class="text-base font-bold text-white
-                       transform group-hover:translate-x-2 transition-transform duration-300">
-              {{ category.title }}
-            </h3>
-
-            <p class="text-xs text-gray-400
-                      transform group-hover:translate-x-2 transition-transform duration-300 delay-75">
-              {{ category.description }}
-            </p>
+            <div>
+              <h3 class="text-lg font-bold text-white mb-0.5">
+                {{ category.title }}
+              </h3>
+              <p class="text-xs text-gray-400">
+                {{ category.description }}
+              </p>
+            </div>
           </div>
 
           <!-- Arrow Icon -->
-          <div class="flex justify-end mt-1">
-            <div class="w-6 h-6 rounded-full bg-gradient-to-br
-                        flex items-center justify-center
-                        transform group-hover:scale-125 group-hover:rotate-45
-                        transition-all duration-500"
-                 :class="category.gradient">
-              <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-              </svg>
-            </div>
+          <div :class="[
+            'w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center',
+            'transform group-hover:translate-x-1 transition-all duration-300',
+            'opacity-60 group-hover:opacity-100',
+            category.gradient
+          ]">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
           </div>
-
-          <!-- Decorative Elements -->
-          <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br opacity-10
-                      transform translate-x-16 -translate-y-16 group-hover:translate-x-12 group-hover:-translate-y-12
-                      transition-transform duration-700 rounded-full blur-2xl"
-               :class="category.gradient">
-          </div>
-        </div>
-
-        <!-- Shimmer Effect on Hover -->
-        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-          <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent
-                      -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
         </div>
       </router-link>
     </div>
@@ -83,9 +69,9 @@
       </p>
       <router-link to="/devices"
          class="inline-flex items-center space-x-1.5 px-4 py-2 rounded-lg
-                bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-500
+                bg-gradient-to-r from-cyan-500 to-teal-600
                 text-white font-semibold text-xs
-                hover:shadow-lg hover:scale-105
+                hover:shadow-lg hover:shadow-cyan-500/50 hover:scale-105
                 active:scale-95
                 transition-all duration-300">
         <span>View All Devices</span>
@@ -112,17 +98,14 @@ const totalCount = computed(() => 60) // This could be fetched from API
 </script>
 
 <style scoped>
-.glass-card {
+a {
   animation: staggerIn 0.5s ease-out both;
+  min-height: 80px;
+  display: flex;
 }
 
-/* Ensure consistent card heights in grid */
-.glass-card {
+/* Larger card for featured category */
+a.md\:col-span-2.md\:row-span-2 {
   min-height: 120px;
-  display: block;
-}
-
-.glass-card.md\:col-span-2.md\:row-span-2 {
-  min-height: 200px;
 }
 </style>
