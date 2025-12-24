@@ -1,21 +1,18 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header with back button -->
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center space-x-4">
-        <button
-          @click="goBack"
-          class="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <div>
-          <h1 class="text-2xl font-bold text-white">{{ pageTitle }}</h1>
-          <p class="text-gray-400 text-sm">{{ devices.length }} devices found</p>
-        </div>
+    <div class="flex items-center space-x-4 mb-6">
+      <button
+        @click="goBack"
+        class="p-2 rounded-lg bg-gray-800/50 hover:bg-gray-700/50 text-gray-400 hover:text-white transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <div>
+        <h1 class="text-2xl font-bold text-white">{{ pageTitle }}</h1>
+        <p class="text-gray-400 text-sm">{{ devices.length }} devices found</p>
       </div>
-      <AuthButton />
     </div>
 
     <!-- Filter tabs -->
@@ -42,7 +39,7 @@
     <!-- Error state -->
     <div v-else-if="error" class="text-center py-12">
       <p class="text-red-400">{{ error }}</p>
-      <button @click="fetchDevices" class="mt-4 px-4 py-2 bg-cyan-500 text-white rounded-lg">
+      <button @click="fetchDevices" class="mt-4 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors">
         Retry
       </button>
     </div>
@@ -77,7 +74,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '../composables/useApi'
-import AuthButton from '../components/AuthButton.vue'
 
 const route = useRoute()
 const router = useRouter()

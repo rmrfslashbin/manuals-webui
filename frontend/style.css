@@ -1,104 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Blue/Cyan theme - Professional & Tech-focused */
-    --gradient-start: #0ea5e9; /* sky-500 */
-    --gradient-mid: #06b6d4;   /* cyan-500 */
-    --gradient-end: #3b82f6;   /* blue-500 */
+    /* Terminal/CRT Aesthetic - Softer Blue-Cyan Palette */
+    --terminal-cyan: #06b6d4;
+    --terminal-teal: #14b8a6;
+    --phosphor-glow: #06b6d4;
+    --crt-bg: #0a0e14;
+    --scanline: rgba(6, 182, 212, 0.02);
 
-    /* Accent colors */
-    --accent-primary: #0ea5e9;
-    --accent-secondary: #06b6d4;
+    /* Accent colors - Softer technical palette */
+    --accent-primary: var(--terminal-cyan);
+    --accent-secondary: var(--terminal-teal);
+    --accent-error: #ff3366;
+    --accent-info: #60a5fa;
 
-    /* Glassmorphism variables */
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    /* Text colors */
+    --text-primary: #e0f2fe;
+    --text-secondary: #7dd3fc;
+    --text-muted: #475569;
   }
 
-  .dark {
-    --glass-bg: rgba(17, 24, 39, 0.3);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  * {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
-  /* Glassmorphism card */
+  /* Terminal card with CRT glow */
   .glass-card {
-    @apply backdrop-blur-xl bg-white/10 dark:bg-gray-900/30
-           border border-white/20 dark:border-white/10
-           rounded-3xl shadow-2xl
-           transition-all duration-300 ease-out
-           hover:scale-[1.02];
+    position: relative;
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.03) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    border-radius: 2px;
+    box-shadow:
+      0 0 20px rgba(6, 182, 212, 0.1),
+      inset 0 0 20px rgba(6, 182, 212, 0.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Animated gradient text */
+  .glass-card:hover {
+    border-color: var(--terminal-cyan);
+    box-shadow:
+      0 0 30px rgba(6, 182, 212, 0.3),
+      inset 0 0 30px rgba(6, 182, 212, 0.05);
+    transform: translateY(-2px);
+  }
+
+  /* Terminal glow text */
   .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r
-           from-sky-500 via-cyan-500 to-blue-500
-           animate-gradient-x;
+    color: var(--terminal-cyan);
+    text-shadow:
+      0 0 10px rgba(6, 182, 212, 0.8),
+      0 0 20px rgba(6, 182, 212, 0.4);
+    animation: textGlow 3s ease-in-out infinite;
   }
 
-  /* Floating animation */
-  .float {
-    animation: float 6s ease-in-out infinite;
+  @keyframes textGlow {
+    0%, 100% {
+      text-shadow:
+        0 0 10px rgba(6, 182, 212, 0.8),
+        0 0 20px rgba(6, 182, 212, 0.4);
+    }
+    50% {
+      text-shadow:
+        0 0 15px rgba(6, 182, 212, 1),
+        0 0 30px rgba(6, 182, 212, 0.6);
+    }
   }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-  }
-
-  /* Solid dark background */
+  /* CRT Background with scanlines and grid */
   .gradient-bg {
-    @apply bg-gray-900;
+    background-color: var(--crt-bg);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        var(--scanline) 2px,
+        var(--scanline) 4px
+      ),
+      radial-gradient(ellipse at center, rgba(0, 20, 0, 0.5) 0%, rgba(10, 14, 10, 1) 100%);
+    position: relative;
   }
 
-  /* Stagger animation for cards */
-  .stagger-item {
-    animation: staggerIn 0.5s ease-out both;
+  .gradient-bg::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+      linear-gradient(90deg, transparent 98%, rgba(6, 182, 212, 0.03) 98%),
+      linear-gradient(0deg, transparent 98%, rgba(6, 182, 212, 0.03) 98%);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: -1;
   }
 
-  @keyframes staggerIn {
-    from {
+  .gradient-bg::after {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, transparent 40%, var(--crt-bg) 100%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Glitch animation for cards */
+  @keyframes glitchIn {
+    0% {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateX(-10px) skew(-5deg);
+      filter: blur(5px);
     }
-    to {
+    20% {
+      opacity: 0.8;
+      transform: translateX(5px) skew(3deg);
+    }
+    40% {
+      opacity: 0.9;
+      transform: translateX(-2px) skew(-1deg);
+    }
+    60%, 100% {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(0) skew(0deg);
+      filter: blur(0);
     }
+  }
+
+  .stagger-item {
+    animation: glitchIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
   }
 }
 
 @layer utilities {
-  /* Custom gradient animation */
-  @keyframes gradient-x {
-    0%, 100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-  }
-
-  .animate-gradient-x {
-    background-size: 200% 200%;
-    animation: gradient-x 3s ease infinite;
-  }
-
-  /* Glow effect */
+  /* Terminal phosphor glow */
   .glow {
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.5),
-                0 0 40px rgba(6, 182, 212, 0.3);
+    box-shadow:
+      0 0 10px var(--phosphor-glow),
+      0 0 20px rgba(6, 182, 212, 0.5),
+      0 0 40px rgba(6, 182, 212, 0.2);
   }
 
-  .dark .glow {
-    box-shadow: 0 0 30px rgba(14, 165, 233, 0.7),
-                0 0 60px rgba(6, 182, 212, 0.5);
+  /* Pixelated border effect */
+  .pixelated-border {
+    border-image: repeating-linear-gradient(
+      45deg,
+      var(--terminal-green) 0px,
+      var(--terminal-green) 2px,
+      transparent 2px,
+      transparent 4px
+    ) 1;
+  }
+
+  /* CRT flicker */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.95; }
+  }
+
+  .flicker {
+    animation: flicker 0.1s infinite;
+  }
+
+  /* Text with typing effect */
+  @keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  @keyframes blink {
+    50% { border-color: transparent; }
+  }
+
+  .typing {
+    overflow: hidden;
+    border-right: 2px solid var(--terminal-green);
+    white-space: nowrap;
+    animation:
+      typing 2s steps(40) 1s both,
+      blink 0.75s step-end infinite;
   }
 }

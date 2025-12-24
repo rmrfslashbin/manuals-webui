@@ -18,9 +18,18 @@
     </div>
 
     <div>
-      <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">
-        {{ label }}
-      </p>
+      <div class="flex items-center gap-2 mb-0.5">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">
+          {{ label }}
+        </p>
+        <div v-if="showHealth"
+             :class="[
+               'w-2 h-2 rounded-full transition-colors duration-300',
+               healthy ? 'bg-green-500 shadow-lg shadow-green-500/50' : 'bg-red-500 shadow-lg shadow-red-500/50'
+             ]"
+             :title="healthy ? 'API Healthy' : 'API Unavailable'">
+        </div>
+      </div>
       <p class="text-xl font-bold text-white">
         {{ animatedValue }}
       </p>
@@ -44,6 +53,14 @@ const props = defineProps({
   delay: {
     type: Number,
     default: 0
+  },
+  showHealth: {
+    type: Boolean,
+    default: false
+  },
+  healthy: {
+    type: Boolean,
+    default: false
   }
 })
 
